@@ -104,12 +104,11 @@ class DatasetManager:
     
     @classmethod
     def get_spalten_classes(cls, dataset_name):
-        """Get a dict (UPPERCASE keys) and list of all column classes for the given dataset."""
+        """Get a dict and list of all column classes for the given dataset."""
         if dataset_name not in ['adult', 'diabetes']:
             raise ValueError(f"No Spalten mapping for dataset: {dataset_name}")
         module = importlib.import_module(f"src.spalten.{dataset_name.capitalize()}")
-        # Use UPPERCASE keys for compatibility with anonymization configs
-        spalten_dict = {getattr(obj, 'name').upper(): obj for obj in module.__dict__.values() if hasattr(obj, 'name') and not getattr(obj, 'name').upper().startswith('SRC.SPALTEN.')}
+        spalten_dict = {getattr(obj, 'name'): obj for obj in module.__dict__.values() if hasattr(obj, 'name') and not getattr(obj, 'name').startswith('src.spalten.')}
         spalten_list = list(spalten_dict.values())
         return spalten_dict, spalten_list
 
@@ -121,24 +120,20 @@ class DatasetManager:
     @classmethod
     def get_anonymization_class(cls, dataset_name):
         """Get dataset-specific Anonymization enum class (using new spalten_dict)."""
-        # Return from cache if already created
-        if dataset_name in cls._anonymization_cache:
-            return cls._anonymization_cache[dataset_name]
-        # Get spalten mapping (UPPERCASE keys)
+        # Get spalten mapping
         spalten_dict, spalten_list = cls.get_spalten_classes(dataset_name)
         # Get anonymization config
         anon_config = cls._CONFIGS[dataset_name]["anonymization"]
-        # Dynamically set 'all' to all available column names (UPPERCASE)
+        # Dynamically set 'all' to all available column names
         anon_config["all"] = list(spalten_dict.keys())
         # Create mapping for Anonymization enum
         mapping = {}
         for level, columns in anon_config.items():
             if columns is None:
                 columns = anon_config["all"]
-            # Convert column names to actual column classes using UPPERCASE keys
-            spalten_values = [spalten_dict[col.upper()] for col in columns] if columns else []
+            # Convert column names to actual column classes
+            spalten_values = [spalten_dict[col] for col in columns] if columns else []
             mapping[level] = spalten_values
-        # Create and cache the Anonymization enum
+        # Create the Anonymization enum
         anon_class = Enum(f"{dataset_name.capitalize()}Anonymization", mapping)
-        cls._anonymization_cache[dataset_name] = anon_class
         return anon_class

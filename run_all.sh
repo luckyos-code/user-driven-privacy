@@ -9,20 +9,22 @@ WORK_DIR=$PWD/results/all-$TS
 mkdir -p $WORK_DIR
 
 # Define Dask cluster size
-n_workers=8
+n_workers=1
 use_gpu=false  # Set to true if GPU is required
+EXECUTION_MODE="dask" # dask or local_gpu
+RUN_MODE="full_experiment" # full_experiment or create_buffers_only
 
 # Define all parameters
 datasets=(
     "adult"
-    "diabetes"
+    # "diabetes"
 )
 
 # Define percentages as an array of strings (space-separated)
 percentages_list=(
     "0.33 0.33 0.34" # 33% original, 33% generalized, 34% missing
-    # "0.6 0.2 0.2"   # 60% original, 20% generalized, 20% missing
     # "0.0 0.5 0.5"   # 0% original, 50% generalized, 50% missing
+    # "0.6 0.2 0.2"   # 60% original, 20% generalized, 20% missing
 )
 
 train_methods=(
@@ -30,7 +32,7 @@ train_methods=(
     "no_preprocessing"
     # "forced_generalization"
     # "specialization"
-    "weighted_specialization"
+    # "weighted_specialization"
     # "weighted_specialization_highest_confidence"
     #
     # "extended_weighted_specialization"
@@ -41,7 +43,7 @@ test_methods=(
     "no_preprocessing"
     # "forced_generalization"
     # "specialization"
-    "weighted_specialization"
+    # "weighted_specialization"
     # "weighted_specialization_highest_confidence"
     #
     # "extended_weighted_specialization"
@@ -49,11 +51,12 @@ test_methods=(
 
 _filter_by_record_id=(
     false
-    true
+    # true
 )
 
 # Option to enable group duplicates for specific combinations
-_enable_group_duplicates=( # HINT: not used anymore because only few duplicates where present
+# HINT: not used anymore because only few duplicates where present
+_enable_group_duplicates=(
     false
     # true
 )
@@ -77,7 +80,7 @@ for enable_group_duplicates in "${_enable_group_duplicates[@]}"; do
                         fi
                     
                         # Build command
-                        cmd="sbatch ./job.sh -w $WORK_DIR -d $dataset -t $train_method -e $test_method -s $n_workers -p \"$percentages\""
+                        cmd="sbatch ./job.sh -w $WORK_DIR -d $dataset -t $train_method -e $test_method -s $n_workers -p \"$percentages\" --execution-mode $EXECUTION_MODE --run-mode $RUN_MODE"
                         
                         # group arg
                         if [ "$enable_group_duplicates" = true ]; then

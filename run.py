@@ -43,7 +43,8 @@ except Exception as e:
 pct_str = f"{int(round(original_pct*100))}-{int(round(generalized_pct*100))}-{int(round(missing_pct*100))}"
 
 print(f"Preparing data for {args.dataset} with {pct_str} split...")
-create_dataset_versions(args.dataset, original_pct, generalized_pct, missing_pct, args.seed, args.data_dir)
+seed=42
+create_dataset_versions(args.dataset, original_pct, generalized_pct, missing_pct, seed, args.data_dir)
 
 # Run the evaluation with the provided parameters
 run_evaluation(

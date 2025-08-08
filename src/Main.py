@@ -95,9 +95,9 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
     experiment_config["weighted_methods"] = weighted
 
     # Determine if highest_confidence should be used
-    absolute_results = any(method and "highest_confidence" in method.name
+    highest_confidence = any(method and "highest_confidence" in method.name
                         for method in [train_method, test_method] if method)
-    experiment_config["absolute_results"] = absolute_results
+    experiment_config["highest_confidence"] = highest_confidence
 
     # Get dataset-specific anonymization enum
     Anonymization = DatasetManager.get_anonymization_class(dataset)
@@ -106,7 +106,7 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
     # Run evaluation for each anonymization level
     for anonymization in Anonymization:
         # TODO testing
-        if anonymization.name not in ["full"]: continue
+        # if anonymization.name not in ["all"]: continue
         
         # Create a specific config for this anonymization level
         anonymization_config = {
@@ -218,7 +218,7 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
                 # Run your model evaluation with this filtered dataset
                 evaluate_model(
                     dataset, filtered_data, data_test, client, weighted=weighted,
-                    absolute_results=absolute_results, group_duplicates=group_duplicates,
+                    highest_confidence=highest_confidence, group_duplicates=group_duplicates,
                     use_gpu=use_gpu, config=filtering_result_config, random_seed=random_seed
                 )
                 
@@ -228,7 +228,7 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
             # Run evaluation and save results without filtering
             anonymization_config["filtering"] = {"enabled": False}
             evaluate_model(
-                dataset, data_train, data_test, client, weighted=weighted, absolute_results=absolute_results,
+                dataset, data_train, data_test, client, weighted=weighted, highest_confidence=highest_confidence,
                 group_duplicates=group_duplicates, use_gpu=use_gpu, config=anonymization_config, random_seed=random_seed
             )
         
@@ -297,7 +297,7 @@ def create_cluster(n_workers: int = 1, use_gpu: bool = False, cores: int = 8, me
         return LocalCluster(n_workers=n_workers, threads_per_worker=cores, memory_limit=memory)
 
 
-def evaluate_model(dataset, data_train, data_test, client, weighted=False, absolute_results=False,
+def evaluate_model(dataset, data_train, data_test, client, weighted=False, highest_confidence=False,
                    group_duplicates=False, use_gpu=False, config=None, random_seed=42):
     """
     Evaluate model performance and save results for a specific configuration.
@@ -308,7 +308,7 @@ def evaluate_model(dataset, data_train, data_test, client, weighted=False, absol
         data_test: Test data Dask DataFrame
         client: Dask client
         weighted: Whether to use weighted samples
-        absolute_results: Whether to use highest confidence predictions
+        highest_confidence: Whether to use highest confidence predictions
         group_duplicates: Whether to deduplicate records
         use_gpu: Whether to use GPU acceleration
         config: Configuration dictionary to update with results
@@ -346,7 +346,7 @@ def evaluate_model(dataset, data_train, data_test, client, weighted=False, absol
     # Initialize and run model evaluation
     model_evaluator = ModelEvaluator(X_train, X_test, Y_train, y_test_with_record_ids, client, dataset)
     _X_train, _X_test, accuracy, f1_score_0, f1_score_1, training_time, inference_time, feature_importance_df = model_evaluator.train_model(
-        weighted, absolute_results, group_duplicates, use_gpu
+        weighted, highest_confidence, group_duplicates, use_gpu
     )
     
     # Get prediction results

@@ -79,8 +79,16 @@ fi
 start_time=$(date +%s)
 start_time_human=$(date '+%Y-%m-%d %H:%M:%S')
 
-# create run command
-PYTHON_COMMAND="python3 run.py --save_dir $RUN_DIR --data_dir $DATA_DIR --dataset $DATASET --train_method $TRAIN_METHOD --test_method $TEST_METHOD --n_workers $N_WORKERS $GROUP_ARGS $GPU_ARGS $FILTER_ARGS --percentages \"$PERCENTAGES\""
+# create run command as array to preserve argument boundaries
+CMD=(python3 run.py \
+    --save_dir "$RUN_DIR" \
+    --data_dir "$DATA_DIR" \
+    --dataset "$DATASET" \
+    --train_method "$TRAIN_METHOD" \
+    --test_method "$TEST_METHOD" \
+    --n_workers "$N_WORKERS" \
+    $GROUP_ARGS $GPU_ARGS $FILTER_ARGS \
+    --percentages "$PERCENTAGES")
 
 # make the run
 echo "START at $start_time_human"
@@ -88,10 +96,10 @@ echo "START at $start_time_human"
 mkdir -p $RUN_DIR
 # echo $SLURM_JOB_ID > "${RUN_DIR}/slurm-job-id.txt" # added the results csv for each run instead
 
-echo "Command: ${PYTHON_COMMAND}"
+echo "Command: ${CMD[@]}"
 
 export PYTHONUNBUFFERED=1 # to get all print output in log
-cd $PWD && $PYTHON_COMMAND
+cd "$PWD" && "${CMD[@]}"
 
 # Track end time
 end_time=$(date +%s)

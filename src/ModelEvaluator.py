@@ -68,7 +68,7 @@ class ModelEvaluator:
             logger.setLevel(logging.INFO)
         return logger
 
-    def train_model(self, weighted=False, absolute_results=False, group_duplicates=False, use_gpu=False, calc_feature_importance='built_in',
+    def train_model(self, weighted=False, highest_confidence=False, group_duplicates=False, use_gpu=False, calc_feature_importance='built_in',
                     params: Optional[Dict[str, Any]]=None) -> Tuple[float, float, float]:
         """Train XGBoost model and evaluate performance"""
         self.logger.info(f"Starting model training for dataset: {self.dataset}")
@@ -171,7 +171,7 @@ class ModelEvaluator:
         try:
             # Get predictions and true values
             start_time = time.time()
-            y_test, y_pred_proba = self.get_y_test_and_y_pred_proba(cl, X_test, absolute_results)
+            y_test, y_pred_proba = self.get_y_test_and_y_pred_proba(cl, X_test, highest_confidence)
             self.y_true = y_test
             self.pred_proba = y_pred_proba
             
@@ -432,13 +432,13 @@ class ModelEvaluator:
     #         raise
 
     
-    def get_y_test_and_y_pred_proba(self, model, X_test, absolute_results) -> Tuple[np.ndarray, np.ndarray]:
+    def get_y_test_and_y_pred_proba(self, model, X_test, highest_confidence) -> Tuple[np.ndarray, np.ndarray]:
         """Get test labels and corresponding predictions"""
         self.logger.info("Getting predictions and test labels")
         
         try:
             # Get predictions by record ID
-            predicted_values_by_record_id = self.get_predictions_by_record_ids(model, X_test, absolute_results)
+            predicted_values_by_record_id = self.get_predictions_by_record_ids(model, X_test, highest_confidence)
             
             # Merge with actual outcomes
             df_outcome = self.y_test_with_record_ids
@@ -455,9 +455,9 @@ class ModelEvaluator:
             self.logger.error(f"Error getting test predictions: {str(e)}")
             raise
 
-    def get_predictions_by_record_ids(self, model, X_test, absolute_results) -> dd.DataFrame:
+    def get_predictions_by_record_ids(self, model, X_test, highest_confidence) -> dd.DataFrame:
         """Generate and aggregate predictions by record_id"""
-        self.logger.info(f"Generating predictions (absolute_results={absolute_results})")
+        self.logger.info(f"Generating predictions (highest_confidence={highest_confidence})")
         
         try:
             # Generate predictions (probability of positive class)
@@ -466,7 +466,7 @@ class ModelEvaluator:
             X_test['predicted_values'] = y_predicted
             
             # Aggregate predictions by record_id
-            if absolute_results:
+            if highest_confidence:
                 # Select prediction with highest confidence (furthest from 0.5)
                 y_predicted_with_record_id = X_test[[self.record_id_column, 'predicted_values']].groupby([self.record_id_column])['predicted_values'].apply(
                     lambda x: max(x, key=lambda v: abs(v - 0.5))
