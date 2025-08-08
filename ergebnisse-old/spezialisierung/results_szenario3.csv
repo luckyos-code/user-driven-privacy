@@ -1,0 +1,11 @@
+id;column_combination;accuracy;f1_score_class_0;f1_score_class_1;anonymization
+0;;0.8709784411276948;0.9168980986968596;0.7116382505559674;no
+1;age_manipuliert, sex_manipuliert, race_manipuliert;0.8662244333886125;0.9135590798685526;0.7043010752688172;basic
+2;age_manipuliert, sex_manipuliert, race_manipuliert, native-country_manipuliert, education_manipuliert, occupation_manipuliert;0.8537313432835821;0.909327667740388;0.6218919691340383;moderate
+3;age_manipuliert, sex_manipuliert, race_manipuliert, native-country_manipuliert, education_manipuliert, occupation_manipuliert, marital-status_manipuliert, capital-gain_manipuliert, capital-loss_manipuliert, hours-per-week_manipuliert;0.6497512437810945;0.7392592592592593;0.4666666666666667;strong
+4;age_manipuliert, fnlwgt_manipuliert, capital-gain_manipuliert, capital-loss_manipuliert, hours-per-week_manipuliert, sex_manipuliert, workclass_manipuliert, education_manipuliert, marital-status_manipuliert, occupation_manipuliert, relationship_manipuliert, race_manipuliert, native-country_manipuliert;0.6411276948590381;0.7352797259827109;0.4430336307481126;complete
+5;;0.8709784411276948;0.9168980986968596;0.7116382505559674;no
+6;age_manipuliert, sex_manipuliert, race_manipuliert;0.8662244333886125;0.9135590798685526;0.7043010752688172;basic
+7;age_manipuliert, sex_manipuliert, race_manipuliert, native-country_manipuliert, education_manipuliert, occupation_manipuliert;0.8537313432835821;0.909327667740388;0.6218919691340383;moderate
+8;age_manipuliert, sex_manipuliert, race_manipuliert, native-country_manipuliert, education_manipuliert, occupation_manipuliert, marital-status_manipuliert, capital-gain_manipuliert, capital-loss_manipuliert, hours-per-week_manipuliert;0.6497512437810945;0.7392592592592593;0.4666666666666667;strong
+9;age_manipuliert, fnlwgt_manipuliert, capital-gain_manipuliert, capital-loss_manipuliert, hours-per-week_manipuliert, sex_manipuliert, workclass_manipuliert, education_manipuliert, marital-status_manipuliert, occupation_manipuliert, relationship_manipuliert, race_manipuliert, native-country_manipuliert;0.6411276948590381;0.7352797259827109;0.4430336307481126;complete
