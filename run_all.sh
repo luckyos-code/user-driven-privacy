@@ -11,8 +11,6 @@ mkdir -p $WORK_DIR
 # Define Dask cluster size
 n_workers=1
 use_gpu=false  # Set to true if GPU is required
-EXECUTION_MODE="dask" # dask or local_gpu
-RUN_MODE="full_experiment" # full_experiment or create_buffers_only
 
 # Define all parameters
 datasets=(
@@ -87,7 +85,7 @@ for enable_group_duplicates in "${_enable_group_duplicates[@]}"; do
                         fi
                     
                         # Build command
-                        cmd="sbatch ./job.sh -w $WORK_DIR -d $dataset -t $train_method -e $test_method -s $n_workers -p \"$percentages\" --execution-mode $EXECUTION_MODE --run-mode $RUN_MODE"
+                        cmd="sbatch ./job.sh -w $WORK_DIR -d $dataset -t $train_method -e $test_method -s $n_workers -p \"$percentages\""
                         
                         # group arg
                         if [ "$enable_group_duplicates" = true ]; then
