@@ -21,10 +21,24 @@ datasets=(
 )
 
 # Define percentages as an array of strings (space-separated)
+<<<<<<< HEAD
 percentages_list=(
     "0.33 0.33 0.34" # 33% original, 33% generalized, 34% missing
     # "0.0 0.5 0.5"   # 0% original, 50% generalized, 50% missing
     # "0.6 0.2 0.2"   # 60% original, 20% generalized, 20% missing
+=======
+percentages_list=( # O/G/M
+    "0.33 0.33 0.34",
+    "1.0 0.0 0.0",
+    "0.0 1.0 0.0",
+    "0.0 0.0 1.0",
+    "0.66 0.17 0.17",
+    "0.17 0.66 0.17",
+    "0.17 0.17 0.66",
+    "0.50 0.25 0.25",
+    "0.25 0.50 0.25",
+    "0.25 0.25 0.50",
+>>>>>>> 7e9f90c (renew)
 )
 
 train_methods=(
@@ -40,7 +54,7 @@ train_methods=(
 
 test_methods=(
     "original" # always handled like no anonymization
-    "no_preprocessing"
+    #"no_preprocessing"
     # "forced_generalization"
     # "specialization"
     # "weighted_specialization"
