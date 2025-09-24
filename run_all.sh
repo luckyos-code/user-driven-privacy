@@ -8,36 +8,34 @@ TS=$(date '+%Y-%m-%d_%H:%M:%S');
 WORK_DIR=$PWD/results/all-$TS
 mkdir -p $WORK_DIR
 
-# Define Dask cluster size
-n_workers=1
 use_gpu=false  # Set to true if GPU is required
 
 # Define all parameters
 datasets=(
     "adult"
-    # "diabetes"
+    "diabetes"
 )
 
 # Define percentages as an array of strings (space-separated)
 percentages_list=( # O/G/M
     "0.33 0.33 0.34",
-    "1.0 0.0 0.0",
-    "0.0 1.0 0.0",
-    "0.0 0.0 1.0",
-    "0.66 0.17 0.17",
-    "0.17 0.66 0.17",
-    "0.17 0.17 0.66",
-    "0.50 0.25 0.25",
-    "0.25 0.50 0.25",
-    "0.25 0.25 0.50",
+    # "1.0 0.0 0.0",
+    # "0.0 1.0 0.0",
+    # "0.0 0.0 1.0",
+    # "0.66 0.17 0.17",
+    # "0.17 0.66 0.17",
+    # "0.17 0.17 0.66",
+    # "0.50 0.25 0.25",
+    # "0.25 0.50 0.25",
+    # "0.25 0.25 0.50",
 )
 
 train_methods=(
-    "original" # always handled like no anonymization
-    "no_preprocessing"
+    # "original" # always handled like no anonymization
+    # "no_preprocessing"
     # "forced_generalization"
     # "specialization"
-    # "weighted_specialization"
+    "weighted_specialization"
     # "weighted_specialization_highest_confidence"
     #
     # "extended_weighted_specialization"
@@ -45,7 +43,7 @@ train_methods=(
 
 test_methods=(
     "original" # always handled like no anonymization
-    #"no_preprocessing"
+    # "no_preprocessing"
     # "forced_generalization"
     # "specialization"
     # "weighted_specialization"
@@ -56,7 +54,7 @@ test_methods=(
 
 _filter_by_record_id=(
     false
-    # true
+    true
 )
 
 # Option to enable group duplicates for specific combinations
@@ -82,6 +80,15 @@ for enable_group_duplicates in "${_enable_group_duplicates[@]}"; do
                         # Skip runs with filtering if the method does not contain "specialization"
                         if [ "$filter_by_record_id" = true ] && [[ "$train_method" != *"specialization"* && "$test_method" != *"specialization"* ]]; then
                             continue
+                        fi
+
+                        # dynamic cluster size depending on task
+                        if [[ "$train_method" != *"specialization"* && "$test_method" != *"specialization"* ]]; then
+                            n_workers=1
+                        elif [[ "$dataset" == "diabetes" ]]; then
+                            n_workers=4
+                        elif [[ "$dataset" == "adult" ]]; then
+                            n_workers=6
                         fi
                     
                         # Build command
