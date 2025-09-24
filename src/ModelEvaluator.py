@@ -25,7 +25,7 @@ class ModelEvaluator:
         self.X_train = X_train
         self.X_test = X_test
         self.y_train = y_train
-        self.y_test_with_record_ids = y_test_with_record_ids.drop_duplicates()
+        self.y_test_with_record_ids = y_test_with_record_ids
         self.client = client
         
         # Setup logging and results storage
@@ -107,7 +107,6 @@ class ModelEvaluator:
                 self.logger.info("Training with sample weights for specializations")
                 start_time = time.time()
                 X_train, weights = self.get_weights(X_train)
-                X_train = X_train.persist()
                 end_time = time.time() 
                 
                 weighting_time = end_time - start_time
@@ -118,7 +117,6 @@ class ModelEvaluator:
                 self.logger.info("Deduplicating training data with summed weights")
                 start_time = time.time()
                 X_train, weights, y_train = self.group_duplicates(X_train, y_train, weights)
-                X_train = X_train.persist()
                 end_time = time.time()
                 
                 dedup_time = end_time - start_time
@@ -131,8 +129,9 @@ class ModelEvaluator:
             X_train = X_train.drop(columns=[self.record_id_column], errors='ignore')
 
             # persist in memory for better performance
-            X_train = X_train.persist()
-            y_train = y_train.persist()
+            # CHANGE: not persisting during training to save memory
+            # X_train = X_train.persist()
+            # y_train = y_train.persist()
             
             # Train the model
             self.logger.info("Started training")

@@ -11,6 +11,7 @@ from src.DatasetManager import DatasetManager
 from src.FilteringHandler import FilteringHandler
 import time
 from datetime import timedelta
+import dask.dataframe as dd
 
 # Set global seeds for reproducibility
 RANDOM_SEED = 42
@@ -19,7 +20,8 @@ random.seed(RANDOM_SEED)
 
 def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = None, data_dir: str = None,
                 dataset: str = None, train_method: PreparingMethod = None, test_method: PreparingMethod = None,
-                group_duplicates: bool = False, filter_by_record_id: bool = False, random_seed: int = 42, percentages: str = None):
+                group_duplicates: bool = False, filter_by_record_id: bool = False, random_seed: int = 42, percentages: str = None,
+                use_caching: bool = True, cache_only: bool = False, redo_cache: bool = False):
     """
     Main function to run model evaluation with specified configuration.
     
@@ -35,31 +37,42 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
         filter_by_record_id: Whether to filter records by ID
         random_seed: Seed for random number generators to ensure reproducibility
         percentages: Percentage string for subfolder (e.g., '33-33-34')
+        use_caching: If True, use caching for datasets and filtering to speed up subsequent runs
+        cache_only: If True, only prepare and cache datasets without running evaluations
+        redo_cache: If True, force recomputation of cache even if it exists
     """
     # Set global seeds
     np.random.seed(random_seed)
     random.seed(random_seed)
     
+    if cache_only:
+        print("Running in CACHE-ONLY mode: Will prepare and cache datasets without running evaluations.")
+    
     # Start timing the full experiment
     experiment_start_time = time.time()
 
     # Create experiment configuration dictionary to track all settings and results
+    train_method_str = train_method.name if train_method else "original"
+    test_method_str = test_method.name if test_method else "original"
     experiment_config = {
         # Basic configuration
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
         "dataset": dataset,
-        "training_method": train_method.name if train_method else "original",
-        "testing_method": test_method.name if test_method else "original",
+        "training_method": train_method_str,
+        "testing_method": test_method_str,
         "group_duplicates": group_duplicates,
         "filter_by_record_id": filter_by_record_id,
         "random_seed": random_seed,
         "percentages": percentages,
+        "use_caching": use_caching,
+        "cache_only": cache_only,
+        "redo_cache": redo_cache,
         
         # Hardware configuration
         "n_workers": int(n_workers),
         "use_gpu": use_gpu,
         "cores": 8,
-        "memory": '128GB',
+        "memory": '256GB',
         "queue": 'paul',
         "slurm_job_id": os.environ.get('SLURM_JOB_ID'),
         
@@ -106,7 +119,7 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
     # Run evaluation for each anonymization level
     for anonymization in Anonymization:
         # TODO testing
-        # if anonymization.name not in ["all"]: continue
+        if anonymization.name not in ["all"]: continue
         
         # Create a specific config for this anonymization level
         anonymization_config = {
@@ -136,10 +149,31 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
      
         # Map anonymization.value (enum-like) to actual column classes
         columns = [spalten_dict[col.name] for col in anonymization.value]
-        data_loader.preprocess(columns, train_method, test_method)
-     
-        # Get processed data
-        data_train, data_test = data_loader.get_data()
+
+        # Compute cache key based on configuration
+        cache_key = f"{dataset}_{anonymization.name}_{train_method_str}_{test_method_str}_{percentages or 'none'}"
+        # set cache directory for generalized datasets
+        cache_dir = os.path.join(data_dir, "_cache", cache_key)
+        train_cache_path = os.path.join(cache_dir, "train.parquet")
+        test_cache_path = os.path.join(cache_dir, "test.parquet")
+        # set cache directory for filtered datasets
+        filtered_cache_dir = os.path.join(cache_dir, "filtered") if use_caching else None
+
+        if use_caching and not redo_cache and os.path.exists(train_cache_path) and os.path.exists(test_cache_path):
+            data_train = dd.read_parquet(train_cache_path)
+            data_test = dd.read_parquet(test_cache_path)
+            preprocessing_time = 0  # Loaded from cache, no preprocessing time
+            print("Loaded data from cache")
+        else:
+            data_loader.preprocess(columns, train_method, test_method)
+            data_train, data_test = data_loader.get_data()
+            preprocessing_time = time.time() - preprocessing_start_time
+            if use_caching:
+                # Save to cache
+                os.makedirs(cache_dir, exist_ok=True)
+                data_train.to_parquet(train_cache_path, compression='zstd')
+                data_test.to_parquet(test_cache_path, compression='zstd')
+                print("Saved data to cache")
 
         # track original row counts right after loading
         original_train_count = data_train.shape[0].compute()
@@ -153,13 +187,15 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
         print("Row counts original: "+str(anonymization_config["row_counts_original"]))
         
         # Record preprocessing time
-        preprocessing_time = time.time() - preprocessing_start_time
         anonymization_config["preprocessing_time"] = preprocessing_time
-        print(f"Preprocessing finished in {timedelta(seconds=preprocessing_time)}")
+        if preprocessing_time > 0:
+            print(f"Preprocessing finished in {timedelta(seconds=preprocessing_time)}")
+        else:
+            print("Data loaded from cache, skipping preprocessing" if use_caching else "Caching disabled, preprocessing completed")
 
         # apply filtering for specialized entries if wanted
         if (any(method and "specialization" in method.name
-            for method in [train_method] if method) # TODO also for test?!
+            for method in [train_method] if method) # TODO also for test?! -> change cache and filtering and how to handle in predictions
                 and filter_by_record_id):
             record_id_column = DatasetManager.get_record_id_column(dataset)
 
@@ -197,7 +233,7 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
             # Get filtered datasets for all configurations using the FilteringHandler
             filtering_start_time = time.time()
             filtered_datasets = FilteringHandler.filter_specialized_data(
-                data_train, record_id_column, filtering_configs, random_seed
+                data_train, record_id_column, filtering_configs, random_seed, cache_dir=filtered_cache_dir, redo_cache=redo_cache
             )
             filtering_time = time.time() - filtering_start_time
             anonymization_config["filtering_time"] = filtering_time
@@ -215,22 +251,24 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
 
                 print(f"Filtered run (n_duplicates, mode, #filtered_data): {n_duplicates}, {mode}, {filtered_data.shape[0].compute()}")
                 
-                # Run your model evaluation with this filtered dataset
-                evaluate_model(
-                    dataset, filtered_data, data_test, client, weighted=weighted,
-                    highest_confidence=highest_confidence, group_duplicates=group_duplicates,
-                    use_gpu=use_gpu, config=filtering_result_config, random_seed=random_seed
-                )
+                if not cache_only:
+                    # Run your model evaluation with this filtered dataset
+                    evaluate_model(
+                        dataset, filtered_data, data_test, client, weighted=weighted,
+                        highest_confidence=highest_confidence, group_duplicates=group_duplicates,
+                        use_gpu=use_gpu, config=filtering_result_config, random_seed=random_seed
+                    )
                 
                 # Add filtering result to the anonymization config
                 anonymization_config["filtering"]["results"].append(filtering_result_config)
         else:
             # Run evaluation and save results without filtering
             anonymization_config["filtering"] = {"enabled": False}
-            evaluate_model(
-                dataset, data_train, data_test, client, weighted=weighted, highest_confidence=highest_confidence,
-                group_duplicates=group_duplicates, use_gpu=use_gpu, config=anonymization_config, random_seed=random_seed
-            )
+            if not cache_only:
+                evaluate_model(
+                    dataset, data_train, data_test, client, weighted=weighted, highest_confidence=highest_confidence,
+                    group_duplicates=group_duplicates, use_gpu=use_gpu, config=anonymization_config, random_seed=random_seed
+                )
         
         # Calculate total time for this anonymization level
         anonymization_config["total_time"] = time.time() - anonymization_config["start_time"]
@@ -335,14 +373,15 @@ def evaluate_model(dataset, data_train, data_test, client, weighted=False, highe
     
     # Get record_id column for the dataset
     record_id_col = DatasetManager.get_record_id_column(dataset)
-    y_test_with_record_ids = data_test[[record_id_col, label_column]]
+    y_test_with_record_ids = data_test[[record_id_col, label_column]].drop_duplicates()
 
     # Persist the feature and target dataframes for better performance during model training
-    X_train = X_train.persist()
-    Y_train = Y_train.persist()
-    X_test = X_test.persist()
-    y_test_with_record_ids = y_test_with_record_ids.drop_duplicates().persist()
-    
+    # CHANGE: not persisting during training to save memory
+    # X_train = X_train.persist()
+    # Y_train = Y_train.persist()
+    # X_test = X_test.persist()
+    # y_test_with_record_ids = y_test_with_record_ids.persist()
+
     # Initialize and run model evaluation
     model_evaluator = ModelEvaluator(X_train, X_test, Y_train, y_test_with_record_ids, client, dataset)
     _X_train, _X_test, accuracy, f1_score_0, f1_score_1, training_time, inference_time, feature_importance_df = model_evaluator.train_model(

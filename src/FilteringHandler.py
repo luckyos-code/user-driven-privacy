@@ -2,6 +2,8 @@ import numpy as np
 import random
 import pandas as pd
 import dask
+import os
+import dask.dataframe as dd
 
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -22,7 +24,7 @@ class FilteringHandler:
     """
     
     @staticmethod
-    def filter_specialized_data(data_train, record_id_column, filtering_configs, random_seed=42):
+    def filter_specialized_data(data_train, record_id_column, filtering_configs, random_seed=42, cache_dir=None, redo_cache=False):
         """
         Process data with different filtering configurations in one pass.
         
@@ -31,10 +33,27 @@ class FilteringHandler:
             record_id_column: Column containing record IDs
             filtering_configs: List of (n_duplicates, mode) tuples to process
             random_seed: Seed for random number generators
+            cache_dir: Directory to cache filtered datasets (optional)
+            redo_cache: If True, force recomputation even if cache exists
             
         Returns:
             Dictionary mapping (n_duplicates, mode) to filtered DataFrames
         """
+        # Check cache first
+        if cache_dir and not redo_cache:
+            cached_results = {}
+            all_cached = True
+            for n_duplicates, mode in filtering_configs:
+                cache_path = os.path.join(cache_dir, f"{n_duplicates}_{mode or 'none'}.parquet")
+                if os.path.exists(cache_path):
+                    cached_results[(n_duplicates, mode)] = dd.read_parquet(cache_path)
+                else:
+                    all_cached = False
+                    break
+            if all_cached:
+                print("Loaded all filtered datasets from cache")
+                return cached_results
+        
         # Set seed for reproducibility
         np.random.seed(random_seed)
         random.seed(random_seed)
@@ -162,6 +181,15 @@ class FilteringHandler:
             print(f"Final number of rows: {final_count}")
             print(f"Removed {removed_count} rows ({percentage_reduction:.2f}%)")
             
+        # Save results to cache if cache_dir provided
+        if cache_dir:
+            os.makedirs(cache_dir, exist_ok=True)
+            for key, value in results.items():
+                cache_path = os.path.join(cache_dir, f"{key[0]}_{key[1] or 'none'}.parquet")
+                if not os.path.exists(cache_path):
+                    value.to_parquet(cache_path, compression='zstd')
+                    print(f"Saved filtered dataset to cache: {cache_path}")
+        
         return results
 
     @staticmethod
