@@ -4,9 +4,9 @@ from .PrivacyLevel import PrivacyLevel
 class Age:
     name = "Age"
     dict_level1 = {
-        "jung": range(int(1), int(4)+1),
-        "mittel": range(int(5), int(9)+1),
-        "alt": range(int(10), int(13)+1)
+        "young": range(int(1), int(4)+1),
+        "middle": range(int(5), int(9)+1),
+        "old": range(int(10), int(13)+1)
     }
     dict_level2 = {
         "?": range(int(1), int(13)+1)
@@ -51,9 +51,9 @@ class Age:
 class PhysHlth:
     name = "PhysHlth"
     dict_level1 = {
-        "wenig": range(int(0), int(10)+1),
-        "mittel": range(int(11), int(20)+1),
-        "viel": range(int(21), int(30)+1)
+        "low": range(int(0), int(10)+1),
+        "medium": range(int(11), int(20)+1),
+        "high": range(int(21), int(30)+1)
     }
     dict_level2 = {
         "?": range(int(0), int(30)+1)
@@ -332,11 +332,11 @@ class DiffWalk:
 class BMI:
     name = "BMI"
     dict_level1 = {
-        "untergewicht": range(int(12), int(19)+1),
+        "underweight": range(int(12), int(19)+1),
         "normal": range(int(20), int(25)+1),
-        "uebergewicht": range(int(26), int(30)+1),
-        "adipositas1": range(int(31), int(35)+1),
-        "adipositas2": range(int(36), int(40)+1),
+        "overweight": range(int(26), int(30)+1),
+        "obesity1": range(int(31), int(35)+1),
+        "obesity2": range(int(36), int(40)+1),
         "[41-50]": range(int(41), int(50)+1),
         "[51-60]": range(int(51), int(60)+1),
         "[61-70]": range(int(61), int(70)+1),
@@ -344,9 +344,9 @@ class BMI:
         "[>80]": range(int(81), int(98)+1)
     }
     dict_level2 = {
-        "gering": range(int(12), int(25)+1),
-        "mittel": range(int(26), int(40)+1),
-        "hoch": range(int(41), int(98)+1)
+        "low": range(int(12), int(25)+1),
+        "medium": range(int(26), int(40)+1),
+        "high": range(int(41), int(98)+1)
     }
     dict_level3 = {
         "?": range(int(12), int(98)+1)
@@ -399,8 +399,8 @@ class BMI:
 class Education:
     name = "Education"
     dict_level1 = {
-        "schlecht": range(int(1), int(3)+1),
-        "gut": range(int(4), int(6)+1)
+        "low": range(int(1), int(3)+1),
+        "high": range(int(4), int(6)+1)
     }
     dict_level2 = {
         "?": range(int(1), int(6)+1)
@@ -716,8 +716,8 @@ class HvyAlcoholConsump:
 class Income:
     name = "Income"
     dict_level1 = {
-        "wenig": range(int(1), int(4)+1),
-        "viel": range(int(5), int(8)+1)
+        "low": range(int(1), int(4)+1),
+        "high": range(int(5), int(8)+1)
     }
     dict_level2 = {
         "?": range(int(1), int(8)+1)
@@ -760,9 +760,9 @@ class Income:
 class MentHlth:
     name = "MentHlth"
     dict_level1 = {
-        "wenig": range(int(0), int(10)+1),
-        "mittel": range(int(11), int(20)+1),
-        "viel": range(int(21), int(30)+1)
+        "low": range(int(0), int(10)+1),
+        "medium": range(int(11), int(20)+1),
+        "high": range(int(21), int(30)+1)
     }
     dict_level2 = {
         "?": range(int(0), int(30)+1)

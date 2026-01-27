@@ -1,75 +1,19 @@
 README STUFF
     Python 3.9.6
-    creates cache with size of on first run if running all experiments. (for only creating cache first, set caching_only in run_experiment of Main.py to True)
+    downloads and prepares basic datasets with size of in data folder (standard /data), which is set in job.sh
+    creates _cache in data dir with size of ?? (or change cache_dir in run_experiment of Main.py) on first run if running all experiments. (for only creating cache first, set caching_only in run_experiment of Main.py to True)
     caching can be disabled: set use_caching in run_experiment of Main.py to False).
     further, use redo_cache for reinitalizing the caching.
+    datasetcreation (infos for download etc)), datasetmanager (infos, spalten, anon), spalten klasse, vorverarbeitung (clean_and_split_data), dataloader (_set_types))
 
-TODOsruns: alter alles aufsplitten, alles anonymisieren (also keinerlei genaue daten mehr)
+- REMOVE TORCH
 
--- HOW TO HANDLE TEST DATA WITH FILTERING??
--- auswertung sinnvoller
+- README (for slurm run change settings in create_cluster in src/Main.py + in job.sh + select wanted parameters in run_all.sh
 
-- later add report folder with final results and pdf
-- add to github as branch and then merge
-
-GENERAL STUFF:
-***********
-- dataset creation anew + random seeds
-- offen für refactoring: 2 vorverarbeitungsklassen + generalisierung + szenario
-- README (for slurm run change settings in create_cluster in src/Main.py + in job.sh + select wanted parameters in run_all.sh // add new data todos in readme: datasetcreation (infos for download etc)), datasetmanager (infos, spalten, anon), spalten klasse, vorverarbeitung (clean_and_split_data), dataloader (_set_types))
-- roc curve?! -> roc curve + proba distribution in resultshandler
-
-OPTIONAL STUFF FOR NOW (more in google keep):
-***********
-- cuda / gpu support 
-- h5 saving
-!- did not work... grouping for test set? (group the same entries, keep a log of record_ids that are the same entries, predict on the reduced test set and get a prediction for each, then expand predictions to the logged record_ids that should get the same prediction since they had they had a duplicate entry)
-
-GPT STUFF:
-***********
-- sacct -j 13801688 --format=JobID,JobName,State,ExitCode,MaxRSS%15,MaxVMSize%15 | awk '{if(NR>2){gsub(/K$/,"",$5); gsub(/K$/,"",$6); if($5~/^[0-9]+$/){$5=sprintf("%.2f GB", $5/1048576)} if($6~/^[0-9]+$/){$6=sprintf("%.2f GB", $6/1048576)}}}1' | column -t
 - squeue -u $USER | awk '!/spawner/ && NR>1 {print $1}' | xargs scancel
-- rsync -avz --exclude 'dask-worker-space' -e 'ssh' ll95wyqa@login01.sc.uni-leipzig.de:/home/sc.uni-leipzig.de/ll95wyqa/projects/user-driven-privacy "/Users/lucas/Library/CloudStorage/OneDrive-Personal/Dokumente/clara-backup/$(date +%Y-%m-%d_%H-%M-%S)"
-- please work on the prompt in the attached file
-- format and add short comments for functionality:
-- optimize my code but really rethink at every step to make sure function is kept:
-- i am on a slurm cluster with dask and using the dask xgboost classifier. i have the adult dataset but modified it to include 4685465536 rows instead of 36177 for training. how can i make it run the best
-
-
-
-
-method translations from resultshanlder:
-
-    if method == Preparing_Method.weighted_specialization:
-        filename += "gewichtete_spezialisierung/"
-    elif method == Preparing_Method.specialization:
-        filename += "spezialisierung/"
-    elif method == Preparing_Method.forced_generalization:
-        filename += "zwangsgeneralisierung/"
-    elif method == Preparing_Method.weighted_specialization_highest_confidence:
-        filename += "spezialisierung_höchste_sicherheit/"
-    elif method == Preparing_Method.no_preprocessing:
-        filename += "keine_aufbereitung/"
-    elif method == Preparing_Method.extended_weighted_specialization:
-        filename += "erweiterte_gewichtete_spezialisierung/"
-    elif method == Preparing_Method.complete_weighted_specialization:
-        filename += "komplett_gewichtete_spezialisierung/"
-    elif method == Preparing_Method.complete_forced_generalization:
-        filename += "komplett_zwangsgeneralisierung/"
-    elif method == Preparing_Method.complete_no_preprocessing:
-        filename += "komplett_keine_aufbereitung/"
-
-from data loader:
-
-    generalized_train_path = "dataset/anonymisiert/adult_train.csv"
-    generalized_test_path = "dataset/anonymisiert/adult_test.csv"
-    complete_generalized_train_path = "dataset/komplett_anonymisiert/adult_train.csv"
-    complete_generalized_test_path = "dataset/komplett_anonymisiert/adult_test.csv"
-    specialized_path = "dataset/spezialisiert/"
-    extended_specialized_path = "dataset/erweitert_spezialisiert/"
-    forced_generalized_path = "dataset/zwangsgeneralisiert/"
-    complete_specialized_path = "dataset/komplett_spezialisiert/"
-    complete_extended_specialized_path = "dataset/komplett_erweitert_spezialisiert/"
-    complete_forced_generalized_path = "dataset/komplett_zwangsgeneralisiert/"
-
-    CATEGORICAL_COLUMNS = ['workclass', 'education', 'marital-status', 'occupation', 'relationship', 'race', 'sex', 'native-country']
+rclone bisync "/Users/lucas/Library/CloudStorage/OneDrive-Personal/Dokumente/clara-backup/2025-07-01_16-59-25(cursor)/user-driven-privacy" "user-driven:/home/sc.uni-leipzig.de/ll95wyqa/projects/user-driven-privacy" \
+                  --exclude "/dask-worker-space/**" \
+                  --exclude "/.git/**" \
+                  --conflict-resolve newer \
+                  --create-empty-src-dirs \
+                  -P

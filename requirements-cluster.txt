@@ -157,7 +157,9 @@ pyzmq @ file:///lscratch/eb/build/IPython/7.26.0/GCCcore-11.2.0/pyzmq/pyzmq-22.2
 regex @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/regex/regex-2021.8.3
 requests @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/requests/requests-2.26.0
 requests-toolbelt @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/requeststoolbelt/requests-toolbelt-0.9.1
+aiohttp==3.11.11
 requests-unixsocket @ file:///lscratch/eb/build/JupyterLab/3.1.6/GCCcore-11.2.0/requestsunixsocket/requests-unixsocket-0.2.0
+folktables==0.0.12
 scandir @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/scandir/scandir-1.10.0
 scikit-learn @ file:///lscratch/eb/build/scikitlearn/1.0.1/foss-2021b/scikitlearn/scikit-learn-1.0.1
 scipy @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/scipy/scipy-1.7.1

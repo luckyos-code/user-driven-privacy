@@ -3,9 +3,9 @@
 #SBATCH --time=48:00:00
 #SBATCH --ntasks=1 
 #SBATCH --cpus-per-task=1  
-#SBATCH --mem=8G                   # was 400G before
+#SBATCH --mem=32G
 #SBATCH --job-name=user_privacy
-#SBATCH --partition=paul
+#SBATCH --partition=paula
 #SBATCH --output=slurm_logs/%j/stdout.out
 #SBATCH --error=slurm_logs/%j/stderr.err
 
@@ -16,7 +16,9 @@ module load CUDA/11.8.0
 module load dask/2022.1.0-foss-2021b # Python 3.9.6
 module load matplotlib/3.4.3-foss-2021b
 
-pip install xgboost==2.0.3 h5py==3.11.0 seaborn==0.13.2 scikit-learn==1.2.2 torch==2.6.0
+# Install packages to user directory to avoid permission issues with system packages
+# Use --user flag to install in user's home directory without modifying system packages
+pip install --no-cache-dir xgboost==2.0.3 h5py==3.11.0 seaborn==0.13.2 scikit-learn==1.2.2 fastparquet==2024.11.0 folktables==0.0.12 # numpy==1.21.3
 
 # Default parameters as fallback - see run_all for real parameters
 DEFAULT_WORK_DIR=$PWD/results/default
@@ -26,14 +28,17 @@ TEST_METHOD="original"
 GROUP_DUPLICATES=false
 N_WORKERS=1
 USE_GPU=false
+FILTER_BY_RECORD_ID=true
 PERCENTAGES="0.33 0.33 0.34"  # space-separated string for percentages
+CACHE_ONLY=false
 
 # common paths
 CODE_DIR=$PWD/src
-DATA_DIR=$PWD/data
+# DATA_DIR=$PWD/data # TODO dataset download and processing location, moved due to quota limits
+DATA_DIR=/work/ll95wyqa-user-driven
 
 # Parse command line arguments
-while getopts w:d:t:e:s:gnfp: flag
+while getopts w:d:t:e:s:gnfp:c flag
 do
     case "${flag}" in
         w) WORK_DIR=${OPTARG};;
@@ -45,6 +50,7 @@ do
         n) USE_GPU=true;;
         f) FILTER_BY_RECORD_ID=true;;
         p) PERCENTAGES="${OPTARG}";;
+        c) CACHE_ONLY=true;;
     esac
 done
 
@@ -75,6 +81,11 @@ if [ "$FILTER_BY_RECORD_ID" = true ]; then
     FILTER_ARGS="--filter_by_record_id"
 fi
 
+CACHE_ARGS=""
+if [ "$CACHE_ONLY" = true ]; then
+    CACHE_ARGS="--cache_only"
+fi
+
 # Track start time
 start_time=$(date +%s)
 start_time_human=$(date '+%Y-%m-%d %H:%M:%S')
@@ -87,7 +98,7 @@ CMD=(python3 run.py \
     --train_method "$TRAIN_METHOD" \
     --test_method "$TEST_METHOD" \
     --n_workers "$N_WORKERS" \
-    $GROUP_ARGS $GPU_ARGS $FILTER_ARGS \
+    $GROUP_ARGS $GPU_ARGS $FILTER_ARGS $CACHE_ARGS \
     --percentages "$PERCENTAGES")
 
 # make the run

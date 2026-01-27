@@ -14,6 +14,7 @@ parser.add_argument('--use_gpu', action='store_true', help='Whether to use GPU a
 parser.add_argument('--n_workers', required=True, help='Size of dask cluster to use')
 parser.add_argument('--filter_by_record_id', action='store_true', help='Whether to filter by record id')
 parser.add_argument('--percentages', required=True, help='Percentages for the dataset split')
+parser.add_argument('--cache_only', action='store_true', help='Whether to only prepare and cache datasets without running evaluations')
 args = parser.parse_args()
 
 print(f"Saving to: {args.save_dir}")
@@ -25,6 +26,7 @@ print(f"Filter by record id: {args.filter_by_record_id}")
 print(f"Using GPU: {args.use_gpu}")
 print(f"Using n_workers: {args.n_workers}")
 print(f"Percentages: {args.percentages}")
+print(f"Cache only: {args.cache_only}")
 
 # Convert string arguments to appropriate PreparingMethod enum values
 train_method = getattr(PreparingMethod, args.train_method)
@@ -58,4 +60,5 @@ run_evaluation(
     group_duplicates=args.group_duplicates,
     filter_by_record_id=args.filter_by_record_id,
     percentages=pct_str,
+    cache_only=args.cache_only,
 )

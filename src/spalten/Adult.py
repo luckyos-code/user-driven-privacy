@@ -15,9 +15,9 @@ class Age:
         "[80-90]": range(int(80), int(90)+1)
     }
     dict_level2 = {
-        "jung": range(int(0), int(29)+1),
-        "mittel": range(int(30), int(59)+1),
-        "alt": range(int(60), int(90)+1)
+        "young": range(int(0), int(29)+1),
+        "middle": range(int(30), int(59)+1),
+        "old": range(int(60), int(90)+1)
     }
     dict_level3 = {
         "?": range(int(0), int(90)+1)
@@ -337,9 +337,9 @@ class HoursPerWeek:
         "[90-99]": range(int(90), int(99)+1)
     }
     dict_level2 = {
-        "wenig": range(int(0), int(29)+1),
-        "mittel": range(int(30), int(59)+1),
-        "viel": range(int(60), int(99)+1)
+        "low": range(int(0), int(29)+1),
+        "medium": range(int(30), int(59)+1),
+        "high": range(int(60), int(99)+1)
     }
     dict_level3 = {
         "?": range(int(0), int(99)+1)
@@ -439,10 +439,10 @@ class MaritalStatus:
 class NativeCountry:
     name = "native-country"
     dict_level1 = {
-        "Europa": ['Germany', 'Greece', 'England', 'Italy', 'Poland', 'Portugal', 'Ireland', 'France', 'Hungary', 'Holand-Netherlands', 'Scotland', 'Yugoslavia', ],
-        "Amerika": ['United-States', 'Canada', 'Cuba', 'Mexico', 'Ecuador', 'Puerto-Rico', 'Outlying-US(Guam-USVI-etc)', 'Columbia', 'Nicaragua', 'Peru', 'Honduras', 'Jamaica', 'Dominican-Republic', 'El-Salvador', 'Haiti', 'Guatemala', 'Trinadad&Tobago'],
-        "Asien": ['India', 'Japan', 'China', 'Iran', 'Philippines', 'Vietnam', 'Taiwan', 'Cambodia', 'Thailand', 'Hong', 'Laos', ],
-        "Afrika": ['South']
+        "Europe": ['Germany', 'Greece', 'England', 'Italy', 'Poland', 'Portugal', 'Ireland', 'France', 'Hungary', 'Holand-Netherlands', 'Scotland', 'Yugoslavia', ],
+        "America": ['United-States', 'Canada', 'Cuba', 'Mexico', 'Ecuador', 'Puerto-Rico', 'Outlying-US(Guam-USVI-etc)', 'Columbia', 'Nicaragua', 'Peru', 'Honduras', 'Jamaica', 'Dominican-Republic', 'El-Salvador', 'Haiti', 'Guatemala', 'Trinadad&Tobago'],
+        "Asia": ['India', 'Japan', 'China', 'Iran', 'Philippines', 'Vietnam', 'Taiwan', 'Cambodia', 'Thailand', 'Hong', 'Laos', ],
+        "Africa": ['South']
     }
     dict_level2 = {
         "?": ['United-States', 'Cambodia', 'England', 'Puerto-Rico', 'Canada', 'Germany', 'Outlying-US(Guam-USVI-etc)', 'India', 'Japan', 'Greece', 'South', 'China', 'Cuba', 'Iran', 'Honduras', 'Philippines', 'Italy', 'Poland', 'Jamaica', 'Vietnam', 'Mexico', 'Portugal', 'Ireland', 'France', 'Dominican-Republic', 'Laos', 'Ecuador', 'Taiwan', 'Haiti', 'Columbia', 'Hungary', 'Guatemala', 'Nicaragua', 'Scotland', 'Thailand', 'Yugoslavia', 'El-Salvador', 'Trinadad&Tobago', 'Peru', 'Hong', 'Holand-Netherlands']
@@ -487,7 +487,7 @@ class NativeCountry:
 class Occupation:
     name = "occupation"
     dict_level1 = {
-        "serives": ['Handlers-cleaners', 'Priv-house-serv', 'Other-service'],
+        "services": ['Handlers-cleaners', 'Priv-house-serv', 'Other-service'],
         "craft": ['Craft-repair', 'Farming-fishing', 'Transport-moving'],
         "tech": ['Tech-support', 'Machine-op-inspct'],
         "professional_management": ['Prof-specialty', 'Exec-managerial'],

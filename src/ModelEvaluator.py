@@ -1,5 +1,5 @@
 from xgboost.dask import DaskXGBClassifier
-from sklearn.metrics import f1_score, accuracy_score
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 from dask.distributed import Client
 import dask.dataframe as dd
 import numpy as np
@@ -83,7 +83,8 @@ class ModelEvaluator:
             'n_estimators': 40,
             'max_depth': 5,
             'enable_categorical': True,
-            'verbosity': 1
+            'verbosity': 1,
+            'tree_method': 'gpu_hist' if use_gpu else 'hist',
         }
         
         if params:
@@ -147,11 +148,9 @@ class ModelEvaluator:
             if calc_feature_importance:
                 self.logger.info(f"Calculating feature importance using {calc_feature_importance} method")
                 if calc_feature_importance == 'built_in':
-                    feature_importance_df = self.calculate_feature_importance(cl, X_train.compute())
-                elif calc_feature_importance == 'permutation':
-                    feature_importance_df = self.calculate_permutation_importance(cl, X_test, y_test)
-                elif calc_feature_importance == 'shap':
-                    feature_importance_df, _, _ = self.calculate_shap_importance(cl, X_test)
+                    # Get feature names from X_train metadata (no compute needed)
+                    feature_names = X_train.columns.tolist()
+                    feature_importance_df = self.calculate_feature_importance_from_model(cl, feature_names)
             
                 self.logger.info(f"Feature importance ({calc_feature_importance}): \n{feature_importance_df}")
 
@@ -181,69 +180,36 @@ class ModelEvaluator:
             accuracy = accuracy_score(y_test, y_pred)
             f1_score_0 = f1_score(y_test, y_pred, pos_label=0)
             f1_score_1 = f1_score(y_test, y_pred, pos_label=1)
+            precision = precision_score(y_test, y_pred, average='macro', zero_division=0)
+            recall = recall_score(y_test, y_pred, average='macro', zero_division=0)
             end_time = time.time() 
 
             inference_time = end_time - start_time
             self.logger.info(f"Evaluation metrics - Accuracy: {accuracy:.4f}, F1: {((f1_score_0+f1_score_1)/2):.4f} (in {str(timedelta(seconds=inference_time))})")
             
-            return X_train, X_test, accuracy, f1_score_0, f1_score_1, training_time, inference_time, feature_importance_df
+            return X_train, X_test, accuracy, f1_score_0, f1_score_1, precision, recall, training_time, inference_time, feature_importance_df
             
         except Exception as e:
             self.logger.error(f"Error during prediction or evaluation: {str(e)}")
             raise
 
-    def calculate_feature_importance(self, model, X_train):
-        # Get feature importance
+    def calculate_feature_importance_from_model(self, model, feature_names):
+        """Get feature importance from trained model without computing data.
+        
+        Args:
+            model: Trained DaskXGBClassifier
+            feature_names: List of feature column names (from X_train.columns)
+        """
+        # Get feature importance from the trained model
         importance = model.feature_importances_
         
         # Create DataFrame for better visualization
-        feature_names = X_train.columns
         feature_importance_df = pd.DataFrame({
             'Feature': feature_names,
             'Importance': importance
         }).sort_values(by='Importance', ascending=False)
         
         return feature_importance_df
-
-    def calculate_permutation_importance(self, model, X_test, y_test):
-        from sklearn.inspection import permutation_importance
-        # Need to compute to numpy arrays for sklearn
-        X_test_computed = X_test.compute() 
-        y_test_computed = y_test.compute()
-        
-        # Calculate permutation importance
-        perm_importance = permutation_importance(model, X_test_computed, y_test_computed, n_repeats=10)
-        
-        # Create DataFrame
-        feature_names = X_test_computed.columns
-        perm_importance_df = pd.DataFrame({
-            'Feature': feature_names,
-            'Importance': perm_importance.importances_mean
-        }).sort_values(by='Importance', ascending=False)
-        
-        return perm_importance_df
-
-    def calculate_shap_importance(self, model, X_test):
-        import shap # TODO install shap
-        
-        # Compute X_test to numpy array
-        X_test_computed = X_test.compute()
-        
-        # Create explainer and calculate SHAP values
-        explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X_test_computed)
-        
-        # Summarize feature importance based on SHAP
-        shap_importance = np.abs(shap_values).mean(axis=0)
-        feature_names = X_test_computed.columns
-        
-        shap_importance_df = pd.DataFrame({
-            'Feature': feature_names,
-            'Importance': shap_importance
-        }).sort_values(by='Importance', ascending=False)
-        
-        return shap_importance_df, explainer, shap_values
-
     
     def get_true_values_and_pred_proba(self) -> Tuple[np.ndarray, np.ndarray]:
         """Return stored true labels and predicted probabilities"""
@@ -302,7 +268,7 @@ class ModelEvaluator:
         # Define columns to group by
         group_cols = [col for col in X.columns if col not in ['_weight']]
         
-        # Better approach: Hash the group columns directly
+        # Hash the group columns directly
         # This creates an immediately available column we can use for shuffling
         X['_group_id'] = dd.hash_pandas_object(X[group_cols], index=False)
         
@@ -337,99 +303,6 @@ class ModelEvaluator:
         self.logger.info("Deduplication in process (actual counts computed after operation)")
         
         return dedup_X, dedup_weights, dedup_y
-
-
-
-    # def group_duplicates(self, X_train, y_train=None, weights=None):
-    #     """Deduplicate records by aggregating identical feature sets - optimized version"""
-        
-    #     self.logger.info("Aggregating duplicate rows and assigning weights")
-    #     try:
-    #         # Prepare data with targets and weights
-    #         X = X_train.copy()
-
-    #         # add needed data columns
-    #         if y_train is not None:
-    #             X['_target'] = y_train
-                
-    #         if weights is not None:
-    #             X['_weight'] = weights
-    #         else:
-    #             X['_weight'] = 1
-            
-    #         # Calculate hash in chunks to avoid memory issues
-    #         record_id_col = None
-    #         if self.record_id_column in X.columns:
-    #             record_id_col = self.record_id_column
-    #             X = X.drop(columns=[record_id_col])
-            
-    #         # Define columns to group by - include target in grouping criteria
-    #         group_cols = [col for col in X.columns if col not in ['_weight']]
-            
-    #         # 1. Modified hash and group approach to prevent memory explosion
-    #         def hash_and_group(df):
-    #             if len(df) == 0:
-    #                 return df
-                
-    #             # Create a hash for grouping by all relevant columns using only numeric representation
-    #             df['_hash'] = pd.util.hash_pandas_object(df[group_cols], index=False).astype('int64')
-                
-    #             # Group by hash with optimized aggregation
-    #             result = df.groupby('_hash').agg({
-    #                 '_weight': 'sum'
-    #             }).reset_index()
-                
-    #             # Reattach the feature values using merge instead of drop_duplicates
-    #             features_df = df[group_cols + ['_hash']].drop_duplicates('_hash')
-    #             result = pd.merge(result, features_df, on='_hash', how='left')
-                
-    #             # Drop the hash column
-    #             return result.drop(columns=['_hash'])
-            
-    #         # Apply the hash and group function to each partition
-    #         result = X.map_partitions(hash_and_group)
-                
-    #         # 2. Instead of doing a second groupby, compute the result and perform the operation in pandas
-    #         # This avoids the memory explosion issue
-    #         self.logger.info("Computing deduplicated result")
-    #         result_pd = result.compute()
-            
-    #         # 3. Do the final grouping in pandas instead of Dask
-    #         self.logger.info(f"Final grouping of {len(result_pd)} rows")
-    #         result_pd = result_pd.groupby(group_cols, observed=True)['_weight'].sum().reset_index()
-                
-    #         # Extract target column back if it exists
-    #         if y_train is not None:
-    #             dedup_y = result_pd['_target']
-    #             dedup_X = result_pd.drop(columns=['_target', '_weight'])
-    #         else:
-    #             dedup_y = None
-    #             dedup_X = result_pd.drop(columns=['_weight'])
-                
-    #         dedup_weights = result_pd['_weight']
-            
-    #         # Add back record_id if it was removed
-    #         if record_id_col:
-    #             dedup_X[self.record_id_column] = [f"dedup_{i}" for i in range(len(dedup_X))]
-
-    #         # Convert back to Dask DataFrames
-    #         dedup_X = dd.from_pandas(dedup_X, npartitions=X_train.npartitions)
-    #         dedup_weights = dd.from_pandas(dedup_weights, npartitions=weights.npartitions)
-    #         if dedup_y is not None:
-    #             dedup_y = dd.from_pandas(dedup_y, npartitions=y_train.npartitions)
-            
-    #         # Log the reduction rate
-    #         orig_len = len(X)
-    #         new_len = len(dedup_X)
-    #         self.logger.info(f"Deduplicated from ~{orig_len} to ~{new_len} rows "
-    #                          f"({100 * (1 - new_len / orig_len):.2f}% reduction)")
-            
-    #         return dedup_X, dedup_weights, dedup_y
-            
-    #     except Exception as e:
-    #         self.logger.error(f"Error aggregating duplicates: {str(e)}")
-    #         raise
-
     
     def get_y_test_and_y_pred_proba(self, model, X_test, highest_confidence) -> Tuple[np.ndarray, np.ndarray]:
         """Get test labels and corresponding predictions"""

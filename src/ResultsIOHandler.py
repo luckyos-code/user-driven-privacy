@@ -10,17 +10,24 @@ from src.DatasetManager import DatasetManager
 
 class ResultsIOHandler:
 
-    def __init__(self, save_dir: str, dataset: str, train_method: PreparingMethod, test_method: PreparingMethod, group_duplicates: bool, filter_by_record_id: bool):
+    def __init__(self, save_dir: str, dataset: str, train_method: PreparingMethod, test_method: PreparingMethod, group_duplicates: bool, filter_by_record_id: bool, percentages: str = None):
         # Store configuration parameters including dataset name
         self.train_method_name = train_method.name if train_method else "original"
         self.test_method_name = test_method.name if test_method else "original"
         self.experiment_name = f"{self.train_method_name}_train_{self.test_method_name}_test" if not group_duplicates else f"{self.train_method_name}_train_{self.test_method_name}_test_group_duplicates"
         self.experiment_name = self.experiment_name if not filter_by_record_id else f"{self.experiment_name}_filter"
+        
+        # Create subdirectory for percentages if provided
+        if percentages:
+            save_dir = os.path.join(save_dir, percentages)
+            os.makedirs(save_dir, exist_ok=True)
+        
         self.file_path_h5 = os.path.join(save_dir, f"results_{self.experiment_name}.h5")
         self.file_path_csv = os.path.join(save_dir, f"results_{self.experiment_name}.csv")
         self.file_path_json = os.path.join(save_dir, f"results_{self.experiment_name}.json")
         self.last_id = self.get_last_id(self.file_path_csv)
         self.dataset = dataset  # Store the dataset name
+        self.percentages = percentages  # Store the percentages
         self.experiment_config = None  # Will store the experiment configuration
 
     def set_experiment_config(self, config):
@@ -58,7 +65,7 @@ class ResultsIOHandler:
         column_combination = self.get_column_combination_string(anonymization)
 
         # Save detailed data to H5 if enabled
-        if h5_saving: # TODO fix
+        if h5_saving:
             with h5py.File(self.file_path_h5, 'a') as file:
                 group = file.require_group(str(self.last_id))
                 group.create_dataset('probas', data=probas)
@@ -417,7 +424,7 @@ def compare_train_test_matrix_ext(results_dir: str, dataset: str, train_methods:
                     fontsize=16, fontweight='bold')
         
         # Create grid for subplots
-        grid = plt.GridSpec(1, num_cols, figure=fig, wspace=1.5) # TODO change this for more spacing
+        grid = plt.GridSpec(1, num_cols, figure=fig, wspace=1.5)
         
         # Function to create and populate a single matrix subplot
         def create_matrix_subplot(ax, filter_config=None):

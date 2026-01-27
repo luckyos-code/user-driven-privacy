@@ -13,13 +13,11 @@ class DatasetManager:
             "numerical_columns": ['age', 'fnlwgt', 'capital-gain', 'capital-loss', 'hours-per-week'],
             "label_column": 'income',
             "record_id_column": 'record_id',
+            "target_description": "Target values: 0 (<=50K income) or 1 (>50K income)",
             "anonymization": {
-                "no": [],                                    # No anonymization
-                "basic": ["age", "sex", "race"],             # Basic demographic info
-                # "moderate": ["AGE", "SEX", "RACE", "NATIVE_COUNTRY", "EDUCATION", "OCCUPATION"],  # Extended demographics
-                # "strong": ["AGE", "SEX", "RACE", "NATIVE_COUNTRY", "EDUCATION", "OCCUPATION",
-                #           "MARITAL_STATUS", "CAPITAL_GAIN", "CAPITAL_LOSS", "HOURS_PER_WEEK"],    # Most attributes
-                "all": None  # Will be populated dynamically with all columns
+                "no": [], # No anonymization
+                "basic": ["age", "sex", "race"], # Basic selection of sensitive attributes
+                "all": None  # Will be populated dynamically with all columns - all attributes are sensitive
             }
         },
         "diabetes": {
@@ -29,18 +27,14 @@ class DatasetManager:
             "numerical_columns": ["Age", "BMI", "GenHlth", "MentHlth", "PhysHlth", "Education", "Income"],
             "label_column": 'Diabetes_binary',
             "record_id_column": 'record_id',
+            "target_description": "Target values: 0 (no diabetes) or 1 (has diabetes)",
             "anonymization": {
                 "no": [], 
-                "basic": ["Age", "Sex", "Income", "Education"],
-                # "moderate": ["AGE", "SEX", "INCOME", "EDUCATION", "BMI", "HIGH_BP", "HIGH_CHOL", "STROKE",
-                #              "HEART_DISEASEOR_ATTACK"],      # Demographics + key health indicators
-                # "strong": ["AGE", "SEX", "INCOME", "EDUCATION", "BMI", "HIGH_BP", "HIGH_CHOL", "STROKE",
-                #            "HEART_DISEASEOR_ATTACK", "SMOKER", "PHYS_ACTIVITY", "FRUITS", "VEGGIES",
-                #            "HVY_ALCOHOL_CONSUMP", "GEN_HLTH", "MENT_HLTH", "PHYS_HLTH", "DIFF_WALK"],
+                "basic": ["Age", "Sex", "Income"],
                 "all": None
             }
         },
-        "german_credit": {
+        "german": {
             # UCI German Credit columns, in order
             "all_columns": [
                 "status", "duration", "credit_history", "purpose", "credit_amount", "savings", "employment_since",
@@ -57,22 +51,153 @@ class DatasetManager:
             "record_id_column": "record_id",
             "anonymization": {
                 "no": [],
-                "basic": ["AGE", "JOB", "HOUSING"],
+                "basic": ["age", "foreign_worker", "housing"],
                 "all": None
             },
-            # Optional: mapping for categorical codes (example, not exhaustive)
+            "target_description": "Target values: 1 (good credit) or 2 (bad credit)",
+            # Complete mapping for all categorical codes from UCI documentation
             "mappings": {
                 "status": {
-                    "A11": "...<0 DM", "A12": "0<=X<200 DM", "A13": ">=200 DM", "A14": "no checking account"
+                    "A11": "<0_DM",
+                    "A12": "0-200_DM",
+                    "A13": ">=200_DM",
+                    "A14": "no_account"
                 },
                 "credit_history": {
-                    "A30": "no credits/all paid", "A31": "all paid", "A32": "existing paid", "A33": "delay", "A34": "critical"
+                    "A30": "no_credits",
+                    "A31": "all_paid",
+                    "A32": "existing_paid",
+                    "A33": "delay",
+                    "A34": "critical"
                 },
-                # ... add more mappings as needed ...
+                "purpose": {
+                    "A40": "car_new",
+                    "A41": "car_used",
+                    "A42": "furniture",
+                    "A43": "radio_tv",
+                    "A44": "appliances",
+                    "A45": "repairs",
+                    "A46": "education",
+                    "A48": "retraining",
+                    "A49": "business",
+                    "A410": "others"
+                },
+                "savings": {
+                    "A61": "<100_DM",
+                    "A62": "100-500_DM",
+                    "A63": "500-1000_DM",
+                    "A64": ">=1000_DM",
+                    "A65": "unknown"
+                },
+                "employment_since": {
+                    "A71": "unemployed",
+                    "A72": "<1_year",
+                    "A73": "1-4_years",
+                    "A74": "4-7_years",
+                    "A75": ">=7_years"
+                },
+                "personal_status_sex": {
+                    "A91": "male_divorced",
+                    "A92": "female_divorced_married",
+                    "A93": "male_single",
+                    "A94": "male_married",
+                    "A95": "female_single"
+                },
+                "other_debtors": {
+                    "A101": "none",
+                    "A102": "co_applicant",
+                    "A103": "guarantor"
+                },
+                "property": {
+                    "A121": "real_estate",
+                    "A122": "building_society",
+                    "A123": "car_other",
+                    "A124": "unknown"
+                },
+                "other_installment_plans": {
+                    "A141": "bank",
+                    "A142": "stores",
+                    "A143": "none"
+                },
+                "housing": {
+                    "A151": "rent",
+                    "A152": "own",
+                    "A153": "free"
+                },
+                "job": {
+                    "A171": "unemployed_unskilled",
+                    "A172": "unskilled",
+                    "A173": "skilled",
+                    "A174": "management"
+                },
+                "telephone": {
+                    "A191": "none",
+                    "A192": "yes"
+                },
+                "foreign_worker": {
+                    "A201": "yes",
+                    "A202": "no"
+                }
+            }
+        },
+        "employment": {
+            # ACS Employment task from folktables
+            # Features from 2018 ACS PUMS (American Community Survey Public Use Microdata Sample)
+            "categorical_columns": [
+                "SCHL",      # Educational attainment
+                "MAR",       # Marital status
+                "RELP",      # Relationship to reference person
+                "DIS",       # Disability recode
+                "ESP",       # Employment status of parents
+                "CIT",       # Citizenship status
+                "MIG",       # Mobility status (lived here 1 year ago)
+                "MIL",       # Military service
+                "ANC",       # Ancestry recode
+                "NATIVITY",  # Nativity
+                "DEAR",      # Hearing difficulty
+                "DEYE",      # Vision difficulty
+                "DREM",      # Cognitive difficulty
+                "SEX",       # Sex
+                "RAC1P"      # Race
+            ],
+            "numerical_columns": [
+                "AGEP"       # Age
+            ],
+            "label_column": "label",  # Employment status (1=employed, 0=not employed)
+            "record_id_column": "record_id",
+            "state": "CA",  # California - can be changed for different distributions
+            "survey_year": "2018",
+            "target_description": "Target values: 0 (not employed) or 1 (employed)",
+            "anonymization": {
+                "no": [],
+                "basic": ["AGEP", "SEX", "RAC1P"], 
+                "all": None 
             }
         }
     }
     
+
+    @classmethod
+    def get_available_datasets(cls):
+        """Dynamically detect available datasets from spalten directory."""
+        import os
+        from pathlib import Path
+        
+        # Get the spalten directory path
+        spalten_dir = Path(__file__).parent / "spalten"
+        
+        if not spalten_dir.exists():
+            return []
+        
+        datasets = []
+        for file in spalten_dir.glob("*.py"):
+            # Skip __init__ and PrivacyLevel
+            if file.stem in ["__init__", "PrivacyLevel"]:
+                continue
+            # Convert to lowercase (e.g., Adult.py -> adult)
+            datasets.append(file.stem.lower())
+        
+        return sorted(datasets)
 
     @classmethod
     def get_config(cls, dataset_name):
@@ -105,8 +230,9 @@ class DatasetManager:
     @classmethod
     def get_spalten_classes(cls, dataset_name):
         """Get a dict and list of all column classes for the given dataset."""
-        if dataset_name not in ['adult', 'diabetes']:
-            raise ValueError(f"No Spalten mapping for dataset: {dataset_name}")
+        available = cls.get_available_datasets()
+        if dataset_name not in available:
+            raise ValueError(f"No Spalten mapping for dataset: {dataset_name}. Available: {available}")
         module = importlib.import_module(f"src.spalten.{dataset_name.capitalize()}")
         spalten_dict = {getattr(obj, 'name'): obj for obj in module.__dict__.values() if hasattr(obj, 'name') and not getattr(obj, 'name').startswith('src.spalten.')}
         spalten_list = list(spalten_dict.values())
