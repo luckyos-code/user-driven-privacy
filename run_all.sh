@@ -72,17 +72,17 @@ percentages_list=(
 train_methods=(
     ## just data
     "original" # always handled like no anonymization
-    # "no_preprocessing"
+    "no_preprocessing"
 
-    # ## methods
-    # "forced_generalization"
-    # "weighted_specialization"
+    ## methods
+    "forced_generalization"
+    "weighted_specialization"
 
-    # ## baselines
-    # "baseline_imputation"
+    ## baselines
+    "baseline_imputation"
     
-    # ## LLM-based methods
-    # "llm_imputation" # Loads pre-imputed data from llm_evaluation/<percentages>/ folder
+    ## LLM-based methods
+    "llm_imputation" # Loads pre-imputed data from llm_evaluation/<percentages>/ folder
     
     ## not used anymore
     # "specialization" # running with only specialization can create all caches, so perfect for a cache_only run but method not used in practice
@@ -93,17 +93,17 @@ train_methods=(
 test_methods=(
     ## just data
     "original" # always handled like no anonymization
-    # "no_preprocessing"
+    "no_preprocessing"
 
-    # ## methods
-    # "forced_generalization"
-    # "weighted_specialization"
+    ## methods
+    "forced_generalization"
+    "weighted_specialization"
 
-    # ## baselines
-    # "baseline_imputation"
+    ## baselines
+    "baseline_imputation"
     
-    # ## LLM-based methods
-    # "llm_imputation" # Loads pre-imputed data from llm_evaluation/<percentages>/ folder
+    ## LLM-based methods
+    "llm_imputation" # Loads pre-imputed data from llm_evaluation/<percentages>/ folder
     
     ## not used anymore
     # "specialization" # running with only specialization can create all caches, so perfect for a cache_only run but method not used in practice
