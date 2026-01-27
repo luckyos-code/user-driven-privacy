@@ -458,7 +458,7 @@ class DataLoader:
             self.data_test = dd.merge(self.data_test, preprocessed_ddf, on=self.config["record_id_column"])
             # Don't repartition here - let merge determine natural partition count
         
-    # TODO
+    # TODO refactor and better handling of non-gernalizable attributes?
     def calculate_anonymization_ratios(self, anonymization, train_method: PreparingMethod = None, test_method: PreparingMethod = None):
         # Handle original method for train data
         if train_method and train_method.name == "original":
@@ -565,7 +565,7 @@ class DataLoader:
     
         return ratios
 
-    # TODO
+    # TODO refactor and better handling of non-gernalizable attributes?
     def calculate_data_analysis_by_column(self, column, df):
         total_values = df[column.name].count()
         original = 0

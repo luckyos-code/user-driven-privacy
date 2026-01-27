@@ -7,9 +7,13 @@
 
 TS=$(date '+%Y-%m-%d_%H:%M:%S');
 
-# Workspace must be allocated before starting the job
+# Workspace must be allocated before starting the job (results will be stored here)
 WORK_DIR=$PWD/results/all-$TS
 mkdir -p $WORK_DIR
+
+# Dataset download and processing location (can be changed for quota limits)
+# Important: if changed, also update data location when doing LLM runs
+DATA_DIR=$PWD/data
 
  # Set to true if GPU is required
 use_gpu=false
@@ -49,14 +53,14 @@ datasets=(
 
 # Define percentages as an array of strings (space-separated)
 # comment out percentages you don't want to run
-percentages_list=( # TODO
+percentages_list=(
     # Original Generalized Missing
     # "1.0 0.0 0.0" # dont use, as this is already handled with "original-original" methods combination, so not actually needed
-    #"0.66 0.17 0.17"
-    #"0.66 0.00 0.34"
-    #"0.33 0.33 0.34"
-    #"0.33 0.00 0.67"
-    #"0.00 0.66 0.34"
+    "0.66 0.17 0.17"
+    "0.66 0.00 0.34"
+    "0.33 0.33 0.34"
+    "0.33 0.00 0.67"
+    "0.00 0.66 0.34"
 
     # additional splits
     #"0.90 0.05 0.05" # for fast testing
@@ -68,17 +72,17 @@ percentages_list=( # TODO
 train_methods=(
     ## just data
     "original" # always handled like no anonymization
-    "no_preprocessing"
+    # "no_preprocessing"
 
-    ## methods
-    "forced_generalization"
-    "weighted_specialization"
+    # ## methods
+    # "forced_generalization"
+    # "weighted_specialization"
 
-    ## baselines
-    "baseline_imputation"
+    # ## baselines
+    # "baseline_imputation"
     
-    ## LLM-based methods
-    "llm_imputation" # Loads pre-imputed data from llm_evaluation/<percentages>/ folder
+    # ## LLM-based methods
+    # "llm_imputation" # Loads pre-imputed data from llm_evaluation/<percentages>/ folder
     
     ## not used anymore
     # "specialization" # running with only specialization can create all caches, so perfect for a cache_only run but method not used in practice
@@ -89,17 +93,17 @@ train_methods=(
 test_methods=(
     ## just data
     "original" # always handled like no anonymization
-    "no_preprocessing"
+    # "no_preprocessing"
 
-    ## methods
-    "forced_generalization"
-    "weighted_specialization"
+    # ## methods
+    # "forced_generalization"
+    # "weighted_specialization"
 
-    ## baselines
-    "baseline_imputation"
+    # ## baselines
+    # "baseline_imputation"
     
-    ## LLM-based methods
-    "llm_imputation" # Loads pre-imputed data from llm_evaluation/<percentages>/ folder
+    # ## LLM-based methods
+    # "llm_imputation" # Loads pre-imputed data from llm_evaluation/<percentages>/ folder
     
     ## not used anymore
     # "specialization" # running with only specialization can create all caches, so perfect for a cache_only run but method not used in practice
@@ -178,11 +182,11 @@ for dataset in "${datasets[@]}"; do
                 elif [[ "$dataset" == "german" ]]; then
                     n_workers=1
                 elif [[ "$dataset" == "employment" ]]; then
-                    n_workers=2 # may need adjustment based on run setup
+                    n_workers=2 #TODO may need adjustment based on run setup
                 fi
 
                 # Build command
-                cmd="sbatch ./run.job -w $WORK_DIR -d $dataset -t $train_method -e $test_method -s $n_workers -p \"$percentages\""
+                cmd="sbatch ./run.job -w $WORK_DIR -d $dataset -t $train_method -e $test_method -s $n_workers -p \"$percentages\" -i $DATA_DIR"
 
                 # group arg
                 if [ "$enable_group_duplicates" = true ]; then

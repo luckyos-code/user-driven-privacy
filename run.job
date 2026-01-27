@@ -31,13 +31,15 @@ FILTER_BY_RECORD_ID=true
 PERCENTAGES="0.33 0.33 0.34"  # space-separated string for percentages
 CACHE_ONLY=false
 
+# default dataset download and processing location (can be overridden via -i flag from run_all.sh)
+# if changed, also update for LLM runs
+DATA_DIR=$PWD/data 
+
 # common paths
 CODE_DIR=$PWD/src
-# DATA_DIR=$PWD/data # TODO dataset download and processing location, moved due to quota limits
-DATA_DIR=/work/ll95wyqa-user-driven
 
 # Parse command line arguments
-while getopts w:d:t:e:s:gnfp:c flag
+while getopts w:d:t:e:s:i:gnfp:c flag
 do
     case "${flag}" in
         w) WORK_DIR=${OPTARG};;
@@ -45,6 +47,7 @@ do
         t) TRAIN_METHOD=${OPTARG};;
         e) TEST_METHOD=${OPTARG};;
         s) N_WORKERS=${OPTARG};;
+        i) DATA_DIR=${OPTARG};;
         g) GROUP_DUPLICATES=true;;
         n) USE_GPU=true;;
         f) FILTER_BY_RECORD_ID=true;;

@@ -2,9 +2,9 @@
 # LLM Evaluation Helper Script for slurm jobs
 # Simplifies launching and merging partitioned evaluations
 
-# TODO
-# bash llm_runs.sh launch "33-33-34,33-0-67,0-66-34,66-0-34,66-17-17" Employment 1 10 /work/ll95wyqa-user-driven
-# bash llm_runs.sh launch "1-0-0" "German-Adult-Diabetes-Employment" 1 10 /work/ll95wyqa-user-driven
+# examples used
+# bash llm_runs.sh launch "33-33-34,33-0-67,0-66-34,66-0-34,66-17-17" Employment 1 10 /work/user-driven
+# bash llm_runs.sh launch "1-0-0" "German-Adult-Diabetes-Employment" 1 10 /work/user-driven
 
 set -e
 

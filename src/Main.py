@@ -248,7 +248,7 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
         if both_original and anonymization.name != "no":
             continue
         
-        # TODO this only allows 'all' anonymization: consider all attributes as senstive, change this to allow other modes if needed, see DatasetManager
+        # TODO this only allows 'all' anonymization: consider all attributes as sensitive, change this to allow other modes if needed, see DatasetManager
         if not both_original and anonymization.name not in ["all"]: continue
         
         # Create a specific config for this anonymization level
