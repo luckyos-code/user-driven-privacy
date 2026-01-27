@@ -17,7 +17,6 @@ module load dask/2022.1.0-foss-2021b # Python 3.9.6
 module load matplotlib/3.4.3-foss-2021b
 
 # Install packages to user directory to avoid permission issues with system packages
-# Use --user flag to install in user's home directory without modifying system packages
 pip install --no-cache-dir xgboost==2.0.3 h5py==3.11.0 seaborn==0.13.2 scikit-learn==1.2.2 fastparquet==2024.11.0 folktables==0.0.12 # numpy==1.21.3
 
 # Default parameters as fallback - see run_all for real parameters
@@ -105,7 +104,7 @@ CMD=(python3 run.py \
 echo "START at $start_time_human"
 
 mkdir -p $RUN_DIR
-# echo $SLURM_JOB_ID > "${RUN_DIR}/slurm-job-id.txt" # added the results csv for each run instead
+# echo $SLURM_JOB_ID > "${RUN_DIR}/slurm-job-id.txt" # added to results for each run instead
 
 echo "Command: ${CMD[@]}"
 

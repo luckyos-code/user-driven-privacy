@@ -1,10 +1,10 @@
 #!/bin/bash
-# LLM Evaluation Helper Script
+# LLM Evaluation Helper Script for slurm jobs
 # Simplifies launching and merging partitioned evaluations
-# currently only needed for employment dataset due to size
 
-# bash llm_eval.sh launch "33-33-34,33-0-67,0-66-34,66-0-34,66-17-17" Employment 1 10
-# bash llm_eval.sh launch "1-0-0" "German-Adult-Diabetes-Employment" 1 10
+# TODO
+# bash llm_runs.sh launch "33-33-34,33-0-67,0-66-34,66-0-34,66-17-17" Employment 1 10 /work/ll95wyqa-user-driven
+# bash llm_runs.sh launch "1-0-0" "German-Adult-Diabetes-Employment" 1 10 /work/ll95wyqa-user-driven
 
 set -e
 
@@ -31,13 +31,13 @@ NOTES:
     - [batch_size] defaults to 1 if not provided
 
 EXAMPLES:
-    # Launch for multiple datasets with single percentage (no partitioning needed for smaller datasets)
-    $0 launch 33-33-34 "Adult-Diabetes-German" 1 10 /work/ll95wyqa-user-driven
+    # Launch for multiple datasets with single percentage, batch size 10, and input dir /work/user-driven (no partitioning needed for smaller datasets)
+    $0 launch 33-33-34 "Adult-Diabetes-German" 1 10 /work/user-driven
 
-    # Launch 3 partitions for Employment with single percentage and batch size 10
-    $0 launch 33-33-34 Employment 3 10 /work/ll95wyqa-user-driven
+    # Launch 3 partitions for Employment with single percentage and batch size 10 and default input dir ($PWD/data)
+    $0 launch 33-33-34 Employment 3 10
 
-    # Launch with multiple percentages for multiple datasets
+    # Launch with multiple percentages for multiple datasets with default input dir ($PWD/data)
     $0 launch "33-33-34,33-0-67,0-66-34,66-0-34,66-17-17" "Adult-Diabetes-German" 1 10
 
     # Check job status
@@ -46,11 +46,8 @@ EXAMPLES:
     # Merge results for single percentage
     $0 merge 33-33-34 Employment 3
 
-    # Merge results for multiple percentages
+    # Merge results for multiple percentages at once
     $0 merge "33-33-34,33-0-67,0-66-34,66-0-34,66-17-17" Employment 3
-
-    # Launch with default input dir and batch size 1
-    $0 launch 33-33-34 Employment 3
 EOF
 }
 
@@ -59,7 +56,7 @@ launch() {
     local datasets="$2"
     local partitions="$3"
     local batch_size="${4:-1}"
-    local input_dir="${5:-/work/ll95wyqa-user-driven}"
+    local input_dir="${5:-$PWD/data}"
     
     if [ -z "$percentage" ] || [ -z "$datasets" ] || [ -z "$partitions" ]; then
         echo "ERROR: Missing required arguments for launch"
@@ -71,7 +68,7 @@ launch() {
     IFS='-' read -ra dataset_array <<< "$datasets"
     for dataset in "${dataset_array[@]}"; do
         echo "Launching $partitions partitions for $dataset ($percentage) with batch size $batch_size..."
-        python llm_evaluation_launcher.py \
+        python llm_src/llm_evaluation_launcher.py \
             --percentage "$percentage" \
             --datasets "$dataset" \
             --partitions "$partitions" \
@@ -93,7 +90,7 @@ merge() {
     fi
     
     echo "Merging results for $datasets ($percentage, $partitions partitions)..."
-    python llm_evaluation_merger.py \
+    python llm_src/llm_evaluation_merger.py \
         --percentage "$percentage" \
         --datasets "$datasets" \
         --partitions "$partitions" \

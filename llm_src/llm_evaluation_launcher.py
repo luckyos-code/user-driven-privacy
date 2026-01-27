@@ -25,7 +25,7 @@ def submit_partition_job(
     input_dir,
     results_base,
     batch_size=1,
-    job_file='llm_evaluation.job',
+    job_file='llm.job',
     dry_run=False
 ):
     """Submit a single partition job to SLURM."""
@@ -92,7 +92,7 @@ def main():
     parser.add_argument(
         '--input-dir',
         type=str,
-        default='/work/ll95wyqa-user-driven',
+        default='data',
         help='Base input directory'
     )
     parser.add_argument(
@@ -110,8 +110,8 @@ def main():
     parser.add_argument(
         '--job-file',
         type=str,
-        default='llm_evaluation.job',
-        help='SLURM job file to use'
+        default='llm.job',
+        help='SLURM job file to use (relative to project root)'
     )
     parser.add_argument(
         '--dry-run',
@@ -181,7 +181,7 @@ def main():
             print(f"  {percentage}: {len(job_ids)} jobs ({', '.join(job_ids)})")
         print(f"\nTo merge results after completion, run:")
         for percentage in percentages:
-            print(f"  python llm_evaluation_merger.py --percentage {percentage} --datasets {args.datasets} --partitions {args.partitions}")
+            print(f"  python llm_src/llm_evaluation_merger.py --percentage {percentage} --datasets {args.datasets} --partitions {args.partitions}")
     print(f"{'='*80}")
 
 

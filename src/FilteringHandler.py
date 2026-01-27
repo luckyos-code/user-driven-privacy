@@ -12,12 +12,6 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from src.dask_utils import count_dask_rows
 
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
-
-
 class FilteringHandler:
     """
     Handles filtering of specialized data entries for data analysis.

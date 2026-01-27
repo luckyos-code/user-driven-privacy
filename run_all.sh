@@ -63,7 +63,8 @@ percentages_list=( # TODO
     # "0.0 1.0 0.0" # extreme generalization case (comparable to forced generalization)
 )
 
-# comment out train and test methods you don't want to run
+# comment out train and test methods you don't want to run (depending on require_matching_methods this will create jobs based on cross-product pairs)
+# llm_prediction is directly evaluated using the llm module and extracted from llm_evaluation folder
 train_methods=(
     ## just data
     "original" # always handled like no anonymization
@@ -181,7 +182,7 @@ for dataset in "${datasets[@]}"; do
                 fi
 
                 # Build command
-                cmd="sbatch ./job.sh -w $WORK_DIR -d $dataset -t $train_method -e $test_method -s $n_workers -p \"$percentages\""
+                cmd="sbatch ./run.job -w $WORK_DIR -d $dataset -t $train_method -e $test_method -s $n_workers -p \"$percentages\""
 
                 # group arg
                 if [ "$enable_group_duplicates" = true ]; then

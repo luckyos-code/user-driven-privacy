@@ -29,6 +29,8 @@ from dotenv import load_dotenv
 import tempfile
 from typing import Dict, List, Any, Optional
 
+# Fix import path when script is in llm_src/ subfolder
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.DatasetManager import DatasetManager
 
 
@@ -36,7 +38,7 @@ from src.DatasetManager import DatasetManager
 # CONFIGURATION
 # ============================================================================
 
-base_path = Path(__file__).parent
+base_path = Path(__file__).parent.parent
 
 # Load environment variables
 load_dotenv(base_path / '.env_llm')
@@ -1357,7 +1359,7 @@ def main():
     parser.add_argument(
         '--results-base',
         type=str,
-        default='llm_evaluation',
+        default='../llm_evaluation',
         help='Base folder for results (default: llm_evaluation). Final results dir will be {results_base}/{percentage}_results'
     )
     parser.add_argument(

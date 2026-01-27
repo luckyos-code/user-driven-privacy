@@ -5,15 +5,6 @@ README STUFF
     caching can be disabled: set use_caching in run_experiment of Main.py to False).
     further, use redo_cache for reinitalizing the caching.
     datasetcreation (infos for download etc)), datasetmanager (infos, spalten, anon), spalten klasse, vorverarbeitung (clean_and_split_data), dataloader (_set_types))
-
-- REMOVE TORCH
-
-- README (for slurm run change settings in create_cluster in src/Main.py + in job.sh + select wanted parameters in run_all.sh
+    for slurm run change settings in create_cluster in src/Main.py + in job.sh + select wanted parameters in run_all.sh
 
 - squeue -u $USER | awk '!/spawner/ && NR>1 {print $1}' | xargs scancel
-rclone bisync "/Users/lucas/Library/CloudStorage/OneDrive-Personal/Dokumente/clara-backup/2025-07-01_16-59-25(cursor)/user-driven-privacy" "user-driven:/home/sc.uni-leipzig.de/ll95wyqa/projects/user-driven-privacy" \
-                  --exclude "/dask-worker-space/**" \
-                  --exclude "/.git/**" \
-                  --conflict-resolve newer \
-                  --create-empty-src-dirs \
-                  -P
