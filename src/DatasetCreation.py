@@ -54,6 +54,13 @@ def download_employment_dataset(data_dir='data', state='CA', survey_year='2018')
         print(f"  Records: {len(df)}")
         print(f"  Employed: {labels.sum()} ({labels.mean()*100:.1f}%)")
         
+        # Clean up the downloaded year folder
+        import shutil
+        year_folder = os.path.join(data_dir, survey_year)
+        if os.path.exists(year_folder):
+            shutil.rmtree(year_folder)
+            print(f"Cleaned up temporary folder: {year_folder}")
+        
     except Exception as e:
         print(f"Failed to download employment dataset: {e}")
         import traceback
