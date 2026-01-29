@@ -1,126 +1,158 @@
-# User-Driven Privacy Research Project
+# Learning from Anonymized and Incomplete Tabular Data
 
-This repository contains the codebase for the paper:
+### Paper
 
-**[Paper Title]**  
-[Authors]  
-arXiv: [LINK]
+This repository contains the codebase for the paper: **[Learning from Anonymized and Incomplete Tabular Data](TODO)**
 
-This project investigates the impact of different data preparation techniques on machine learning model performance in the context of user-driven data privacy. The core idea is to simulate scenarios where users can decide the level of privacy for their data, resulting in datasets with a mix of original, generalized, and missing values. We explore both traditional anonymization techniques and LLM-based approaches for data imputation and generation.
+```bibtex
+@article{TODO,
+  title={...},
+  author={...},
+  journal={...},
+  year={...}
+}
+```
+### Abstract TODO
+```
+User-driven privacy allows individuals to control whether and at what granularity their data is shared, leading to datasets that mix original, generalized, and missing values within the same records and attributes. While such representations are intuitive for privacy, they pose challenges for machine learning, which typically treats non-original values as new categories or as missing, thereby discarding generalization semantics. For learning from such tabular data, we propose novel data transformation strategies that account for heterogeneous anonymizations and evaluate them alongside standard imputation and LLM–based approaches. We employ multiple datasets, privacy configurations, and deployment scenarios, demonstrating that our method reliably regains utility. Our results show that generalized values are preferable to pure suppression, that the best preparation strategy depends on the scenario, and that consistent data representations are crucial for maintaining downstream utility. Overall, our findings highlight that effective learning is tied to the appropriate handling of anonymized values.
+```
 
-## Reference Data
+### Reference Data
 
-The datasets and results used in our experiments are publicly available:
+The (anonymized) datasets and LLM imputation/prediction results used in our experiments are publicly available at: [ZENODO](https://doi.org/10.5281/zenodo.18405312)
 
-- **Anonymized datasets**: [LINK]
-- **LLM results and imputed datasets**: [LINK]
+Alternatively, generate the datasets anew by following the instructions below.
 
-Alternatively, you can generate the datasets yourself by following the instructions below.
 
 ## Project Structure
 
--   `run.py`: The main script to run a single experiment.
--   `run_all.sh`: A shell script to automate running batches of experiments with different configurations.
--   `run.job`: A Slurm job script called by `run_all.sh` to submit jobs to a Slurm cluster.
+**Main Scripts and Locations:**
+-   `run_all.sh`, `run.job`, `run.py`: The main scripts to running the general experiments with different configurations.
+-   `ll_runs.sh`, `llm.job`, `llm_src/`: scripts for LLM evaluation.
+-   `requirements_*.txt`: Needed packages for installation.
+-   `DatasetCreation.ipynb`: Notebook for individual generation of original and anonymized datasets
+-   `DatasetCreation_Specialization.ipynb`: Notebook for individual generation of specialized datasets with filtering (optional, normally handled in-memory during experiments)
 -   `src/`: Contains the core Python source code for all pipeline steps.
+    -   `DatasetManager.py`: Collection of dataset important information used in the workflows.
+    -   `spalten/`: Dataset column specifications and generalization hierarchies
     -   `DatasetCreation.py`: Creates dataset versions based on specified privacy preferences (percentages of original, generalized, and missing data).
-    -   `PreparingMethod.py`: Defines data preparation methods applied in `DataLoader.py`, including generalization and specialization techniques.
     -   `Main.py`: Contains the main evaluation loop (`run_evaluation`) for model training and testing.
-    -   Additional modules for data loading, LLM-based imputation, model evaluation, etc.
--   `data/`: Input datasets (e.g., `adult`, `diabetes`).
--   `results/`: Run-specific subfolders containing experiment results.
--   `results_collected/`: Aggregated final results organized by dataset and distribution.
--   `auswertung.ipynb`: Jupyter notebook for analyzing and visualizing results.
+    -   Additional modules for data loading, model evaluation, etc.
 
-## Environment Setup
+
+**Data and Output Directory Reference:**
+- `data/`: Raw and processed datasets
+  - `{dataset}/`: Original dataset files
+  - `{dataset}/generalization/{percentage}/`: Anonymized datasets for each privacy distribution
+  - `{dataset}/forced_generalization/{percentage}/`: Forced generalization preparation output
+  - `{dataset}/specialization/{percentage}/`: Optional pre-generated specialization datasets (normally created in-memory during experiments)
+- `llm_evaluation/`: LLM evaluation outputs
+  - `{percentage}_results/`: Intermediate evaluation results (rename to `{percentage}/` when complete)
+  - `{percentage}/`: Final results used by model evaluation
+- `llm_slurm_logs/`: Slurm job logs for LLM experiments
+- `results/`: Experiment run outputs
+- `slurm_logs/`: Slurm job logs for overall experiments
+
+## Environment and Installation
 We used and recommend using a Slurm + Dask combination on a cluster for the general and LLM experiments.
 Local mode is ok for creating anonymized datasets, local LLM setups, and testing.
 
-### Requirements
-
--   **Slurm**: For distributed job scheduling (required for batch experiments)
--   **Dask**: For parallel processing (not required for anonymized dataset generation and LLM outputs)
--   **Python 3.x**: With dependencies listed in requirements files
-
-### Installation
+-   **Slurm**: For distributed job scheduling (not required for dataset generation and small LLM outputs)
+-   **Dask**: For parallel processing (not required for dataset generation and LLM outputs but included in requirements file)
+-   **Python 3.x**: Depending on environment, with dependencies listed in requirements files
 
 The project provides different requirement files for different use cases:
 
--   **`requirements_local.txt`**: For local development (Python 3.9.6, includes LLM packages)
--   **`requirements_cluster.txt`**: For runs in cluster environment (without LLM packages, as they're loaded via their own job)
--   **`requirements_llm.txt`**: Only packages needed for LLM experiments (Python 3.12.3)
-- For Slurm runs on a cluster, we load the needed packages and module in the two job files, adjust this for your environment.
-
-**Install dependencies:**
+-   **`requirements_local.txt`**: For local development (Python 3.9.19, includes LLM packages)
+-   **`requirements_cluster.txt`**: As reference for cluster environment as loaded by `run.job`, adjust job files to your environment (Python/3.9.6 on cluster, without LLM packages, as they're loaded via `llm.job` for such experiments)
+-   **`requirements_llm.txt`**: Only packages needed for LLM experiments (Python 3.12.3 on cluster)
 
 ```bash
-# For local development
-pip install -r requirements-local.txt
+# Installing packages for local development (for cluster see run.job and llm.job)
 
-# For cluster (additional packages loaded via job scripts)
-pip install -r requirements-cluster.txt
+# using a conda environment
+conda create -n requirements-local python=3.9.19 -y && \
+conda run -n requirements-local pip install -r requirements_local.txt
 
-# For LLM evaluation (in addition to local/cluster requirements)
-pip install -r requirements_llm.txt
+# if pip from file not working:
+#   for some platforms with compatibility issues, use several conda distributed packages for ensuring support (all versions copied from the file)
+conda create -n requirements-local python=3.9.19 -y && \
+conda install -n requirements-local numpy=1.23.5 scipy=1.11.3 pandas=1.5.3 scikit-learn=1.2.2 matplotlib=3.5.2 -c conda-forge -y && \
+conda run -n requirements-local pip install 'dask[distributed]==2023.1.0' dask-jobqueue==0.8.1 dask-mpi==2022.4.0 aiohttp==3.11.11 fastparquet==2024.11.0 folktables==0.0.12 h5py==3.11.0 jupyterlab==3.6.0 python-dotenv==1.0.0 requests==2.32.3 seaborn==0.13.2 xgboost==2.0.3
 ```
 
-## Instructions
+# Instructions
 
 This section covers how to run specific parts of the experiments and how to extend the codebase with new functionality.
 
-### 1. Generating Anonymized Datasets
+## 1. Generating Anonymized Datasets
+This step is only needed if creating datasets separately, otherwise it is done and ensured on the start of each run in `run_all.sh` / `run.job` / `run.py` in Step 3. You may also download them from the [Zenodo](https://doi.org/10.5281/zenodo.18405312) repository instead of running yourself.
 
-The dataset creation process generates anonymized versions of the input datasets with varying levels of privacy. This includes:
+### 1a. Original and Anonymized Datasets
 
--   **Anonymized datasets** with specified distributions of original, generalized, and missing data
--   **Prepared datasets** for generalization and specialization methods
+Use [DatasetCreation.ipynb](DatasetCreation.ipynb), which provides an easy wrapper for running the needed script:
+* Downloads, cleans, and splits the original datasets
+* Creates anonymized versions depending on the set percentages
+* Creates prepared versions for the forced generalization method
 
-**Note on specialization outputs**: Earlier versions generated per-column files for specialization. The codebase has since shifted to record-based in-memory computation for efficiency. The column-based files are kept for reference to illustrate the output column data from specialization.
+### 1b. Specialization Datasets (Optional)
 
-**Run dataset generation**:
+**Note:** Specialization datasets are normally created in-memory during experiments (Step 3). This step is only needed if you want to pre-generate specialization data for analysis or reuse. Actual specialization workflow still creates it in memory and does not read from or write to disk.
 
-```bash
-python src/DatasetCreation.py \
-    --dataset adult \
-    --data_dir ./data \
-    --percentages "0.5 0.3 0.2"
-```
+Use [DatasetCreation_Specialization.ipynb](DatasetCreation_Specialization.ipynb) to create specialized datasets with record-based approach:
+* Loads generalized data from `data/{dataset}/generalization/{percentages}/`
+* For each record, generates variants by expanding generalized values and applies filtering to select best variants if wanted
+* Saves filtered datasets with descriptive names: `specialization_{mode}_n{duplicates}.csv`
 
-### 2. Generating LLM-Based Outputs
+### Data Folder
+Assuming the default `data/` location we get the following structure:
+* `data/`: original and anonymized data for four datasets sorted into subfolders by dataset name
+    * `original`: at the toplevel of each dataset folder we find a `train.csv` and `test.csv` with original data in 80/20 split and the following subfolders:
+    * `generalization/`: contains the anonymized data that again is sorted into subfolders for the different privacy distributions, with train and test data for each 
+    * `forced_generalization/`: similar structure to `generalization/` but contains the prepared data under forced generalization method on the anonymized datasets, contains the whole dataset (no split) which will then be joined into the respective train and test parts by record ids in the experiments
+    * `specialization/`: optional folder for pre-generated specialization datasets (see Step 1b above), normally specialization is created and handled in-memory during experiments
+    * Note: resulting datasets of other methods are not saved to disk as they are created and handled in-memory only
 
-The project includes LLM-based approaches for data imputation and generation. These outputs can be used to compare traditional anonymization techniques with modern generative approaches.
+## 2. Generating LLM-Based Outputs
 
-#### Prerequisites
+The project includes LLM-based approaches for data imputation and prediction. While prediction is a method on its own, outputs for imputation through an LLM are needed if using llm_imputation in Step 3 runs. You may also download from the [Zenodo](https://doi.org/10.5281/zenodo.18405312) repository instead of running yourself.
 
-**Environment Configuration:**
+**What LLM evaluation does:**
 
-1. Configure the LLM API settings in `.env_llm` (in project root):
+For each dataset's training and test sets:
+1. **Value Imputation**: Predicts missing/generalized values and creates imputed dataset versions (both parts saved as CSV)
+2. **Label Prediction**: Directly predicts target labels from anonymized records (results saved as CSV)
+
+Results are saved in `llm_evaluation/{percentage}_results/` directories. When finished, rename to `llm_evaluation/{percentage}/` for use in model evaluation.
+
+### Environment Configuration
+
+1. Configure the LLM API settings in `_.env_llm` and rename to `.env_llm` (in project root):
    ```bash
    LLM_API_BASE_URL="..."
    LLM_API_KEY="..."
    LLM_MODEL="..."
    ```
 
-2. Install LLM-specific dependencies or check cluster dependencies in job file:
+2. Install (at least) LLM-specific dependencies or check cluster dependencies in `llm.job` file:
    ```bash
    pip install -r requirements_llm.txt
    ```
 
-3. Ensure anonymized datasets exist (from Step 1 or downloaded from Zenodo)
+3. Ensure original and anonymized datasets exist, assuming the default `data/` location (from Step 1, Step 3 (except llm_imputation method), or downloaded from [Zenodo](https://doi.org/10.5281/zenodo.18405312) repository)
 
-**What LLM evaluation does:**
+### Running LLM Evaluation
 
-For each dataset's training and test sets:
-1. **Value Imputation**: Predicts missing/generalized values and creates imputed dataset versions (saved as CSV)
-2. **Label Prediction**: Directly predicts target labels from anonymized records (results saved as CSV)
+**Option 1: Local Execution for Testing or Smaller Tasks**
 
-Results are saved in `llm_evaluation/{percentage}_results/` directories. When finished, rename to `llm_evaluation/{percentage}/` for use in model evaluation.
+* Use [llm_evaluation_test.ipynb](llm_src/llm_evaluation_test.ipynb) in `llm_src/`
 
-#### Running LLM Evaluation
-
-**Option 1: Interactive Shell Wrapper (Recommended)**
+**Option 2: Interactive Shell Wrapper (Slurm)**
+Starts jobs on cluster that interact with the LLM API. See `llm_runs.sh` and `llm.job`.
 
 ```bash
+# command: bash llm_runs.sh launch <percentage> <datasets> <partitions> [batch_size] [input_dir]
+
 # Single percentage, multiple datasets
 bash llm_runs.sh launch "33-33-34" "Adult-Diabetes-German" 1 10
 
@@ -130,55 +162,41 @@ bash llm_runs.sh launch "33-33-34,66-17-17" "Employment" 3 10
 # Check job status
 bash llm_runs.sh status
 
-# Merge partitioned results after completion
+# Merge partitioned results after completion (if applicable)
 bash llm_runs.sh merge "33-33-34" "Employment" 3
 ```
 
-**Option 2: Direct SLURM Submission**
-
-```bash
-sbatch --export=ALL,PERCENTAGE=33-33-34,DATASETS=Adult-Diabetes-German,BATCH_SIZE=10,INPUT_DIR=./data,RESULTS_BASE=llm_evaluation llm.job
-```
-
-**Option 3: Python Script Directly**
-Collecting and Analyzing Results
-
-After running experiments, gather the final results from the `results/` folder into a `results_collected/` folder. The collection script organizes results following the structure: `dataset -> distribution -> json files`.
-
-**Run results collection**:
-
-```bash
-cd evaluation
-python generate_results.py
-```
-
-This will aggregate all experiment outputs and organize them for analysis.LM Evaluation Scripts:**
+Other than the top-level job scripts, the subfolder `llm_src/` contains the LLM-related scripts:
+- `.env_llm`: Environment variables (LLM API URL, key, model), fill and rename from `_.env_llm`
 - `llm_runs.sh`: Shell wrapper for launching multiple LLM-related jobs with extra options
-- `llm.job`: SLURM job definition file
+- `llm.job`: Slurm job definition file
 - `llm_src/llm_evaluation.py`: Main LLM evaluation script
 - `llm_src/llm_evaluation_test.ipynb`: Jupyter notebook for small test runs
 - `llm_src/llm_evaluation_launcher.py`: Job launcher with partitioning support
 - `llm_src/llm_evaluation_merger.py`: Merges results from partitioned runs
-- `llm_src/merge_llm_results.py`: Utility for merging partitioned results
+- `llm_src/merge_llm_results.py`: Utility scripts for merging partitioned results
 
-### 3. Overall Evaluation Runs
+## 3. Overall Evaluation Runs
+**Highly recommend Slurm+Dask on a cluster.** Local is still possible with a LocalCluster as implemented in `Main.py`.
 
-Run the complete evaluation pipeline to train and test models on prepared datasets. Results are automatically saved to run-specific subfolders in the `results/` directory.
+Run the complete evaluation pipeline to train and test models on prepared datasets. Results are automatically saved to run-specific subfolders (based on the run_all.sh session) in the `results/` directory and organized following the structure: `dataset -> distribution -> json files`.
 
-#### Running a Single Experiment
+### Running Batch Experiments
 
-**Arguments for `run.py`:**
+To run a comprehensive set of experiments, you can configure and use the `run_all.sh` script.
 
--   `--save_dir`: Directory to save results.
--   `--data_dir`: Base directory containing datasets.
--   `--dataset`: Name of the dataset to use (e.g., `adult`).
--   `--train_method`: The preparation method for the training data (e.g., `weighted_specialization`).
--   `--test_method`: The preparation method for the test data.
--   `--percentages`: A string of three space-separated float values for the dataset split (original, generalized, missing), e.g., `"0.6 0.2 0.2"`.
--   `--n_workers`: The number of Dask workers to use.
--   `--group_duplicates`: (Optional) A flag to enable deduplication of records.
--   `--filter_by_record_id`: (Optional) A flag to enable filtering by record ID, relevant for specialization methods.
--   `--use_gpu`: (Optional) A flag to enable GPU acceleration.
+1.  **Configure `run_all.sh`**: Open the `run_all.sh` script and modify the arrays (`datasets`, `percentages_list`, `train_methods`, `test_methods`, etc.) by commenting out unwanted runs to define the parameter space for your experiments. Also consider the variables `DATA_DIR` and `batch_size` (also `require_matching_methods` if needed). Cluster-related settings for the DaskSlurmCluster constructor need to be changed in the `Main.py`.
+
+2.  **Execute the script**:
+    ```bash
+    bash run_all.sh
+    ```
+    This will start submitting jobs through the `run.job` file to the Slurm cluster based on the configurations. Each job will execute the `run.py` script with a different combination of parameters.
+
+
+### Running a Single Experiment
+
+You may use `run.py` for starting single experiments outside of submitting a Slurm job. See `run.py` for parameters and for our used configurations see `run_all.sh` and `run.job`. Local runs use LocalCluster, see `Main.py`, which we generally did not use for the experiments.
 
 **Example command:**
 
@@ -186,130 +204,28 @@ Run the complete evaluation pipeline to train and test models on prepared datase
 python run.py \
     --save_dir ./results/my_experiment \
     --data_dir ./data \
-    --dataset adult \
-    --train_method weighted_specialization \
-    --test_method weighted_specialization \
-    --percentages "0.5 0.3 0.2" \
-    --n_workers 4
-```
-
-#### Running Batch Experiments
-
-To run a comprehensive set of experiments, you can configure and use the `run_all.sh` script.
-
-1.  **Configure `run_all.sh`**: Open the `run_all.sh` script and modify the arrays (`datasets`, `percentages_list`, `train_methods`, `test_methods`, etc.) to define the parameter space for your experiments.
-
-2.  **Execute the script**:
-    ```bash
-    ./run_all.sh
-    ```
-    This will start submitting jobs to the Slurm cluster based on the configurations. Each job will execute the `run.py` script with a different combination of parameters.
-
-### 4. Generating Results
-
-After running experiments, gather the final results from the `results/` folder into a `results_collected/` folder. The collection script organizes results following the structure: `dataset -> distribution -> json files`.
-
-**Run results collection**:
-
-```bash
-# Command to collect and organize results
-# [Add specific script and parameters]
+    --dataset german \
+    --train_method original \
+    --test_method original \
+    --percentages "1.0 0.0 0.0" \
+    --n_workers 1
 ```
 
 ## Extending the Codebase
 
-### Adding a New Dataset
+### Adding New Privacy Distribution
 
-To a**Create column specifications**: Add a new class in `src/spalten/` folder (following the pattern of existing datasets) that defines generalizations for each column. Import the class in `src/spalten/__init__.py`.
+1. Just run overall experiments with the dataset and percentage and everything will be created accordingly (or run the individual dataset creation)
+2. LLM runs on the new distributions, needed for LLM-based imputation and prediction results
 
-2.  **Configure dataset download**: Add dataset information to `download_dataset_if_missing()` in `src/DatasetCreation.py` for automatic download, or add a custom download function (like for Employment dataset), or manually place files in the `data/` folder.
+### Adding New Dataset
 
-3.  **Add dataset configuration**: Create a config entry in `src/DatasetManager.py` with dataset information, attributes, and anonymization levels.
+1. **Add dataset configuration**: Create a config entry in `src/DatasetManager.py` with dataset information, attributes, and anonymization levels.
+
+2. **Create column specifications**: Add a new class in `src/spalten/` folder (following the pattern of existing datasets) that defines generalizations for each column. Import the class in `src/spalten/__init__.py`.
+
+3.  **Configure dataset download**: Add dataset information to `download_dataset_if_missing()` in `src/DatasetCreation.py` for automatic download, or add a custom download function (like for Employment dataset), or manually place files in the `data/` folder.
 
 4.  **Implement data cleaning**: Review `clean_and_split_data()` in `src/Vorverarbeitung.py` and add any dataset-specific cleaning or splitting logic required.
 
 5.  **Update batch scripts**: Add the dataset name to the `datasets` array in `run_all.sh` for batch processing.
-Additional Notes
-
-### Directory Structure Reference
-
-**Data Directories:**
-- `data/`: Raw and processed datasets
-  - `{dataset}/`: Original dataset files
-  - `{dataset}/generalization/{percentage}/`: Anonymized datasets for each privacy distribution
-  - `{dataset}/specialization/`: Specialization intermediate files (reference only)
-- `llm_evaluation/`: LLM evaluation outputs
-  - `{percentage}_results/`: Active evaluation results (rename to `{percentage}/` when complete)
-  - `{percentage}/`: Final results used by model evaluation
-- `llm_slurm_logs/`: SLURM job logs for LLM experiments
-
-**Results Directories:**
-- `results/`: Individual experiment run outputs
-- `results_collected/`: Aggregated results organized by dataset and distribution
-
-**Source Code:**
-- `src/`: Core pipeline modules
-- `src/spalten/`: Dataset column specifications and generalization hierarchies
-- `llm_src/`: LLM evaluation scripts
-- `evaluation/`: Results collection and analysis scripts
-
-### Working with LLM Results
-
-LLM evaluation creates two types of outputs per dataset split:
-
-1. **Imputation results**: `{dataset}_{split}_imputation_results.csv` - Evaluation of how well the LLM can recover original values
-2. **Imputed datasets**: `{dataset}_{split}_imputed_dataset.csv` - Complete datasets with LLM-imputed values
-3. **Prediction results**: `{dataset}_{split}_prediction_results.csv` - Direct label prediction from anonymized data
-
-These outputs are used in the main evaluation pipeline by setting the training/test methods to `llm_imputation` and ensuring the results are in `llm_evaluation/{percentage}/`.
-
-## Citation
-
-If you use this code or data in your research, please cite our paper:
-
-```bibtex
-@article{...,
-  title={...},
-  author={...},
-  journal={arXiv preprint arXiv:...},
-  year={2025}
-}
-```
-
-add a dataset
-- spalten class: add a new class for the dataset to the src/spalten/ folder like the others that gives generalizations and add the class to the __init__
-- datasetcreation: add the dataset infos to download_dataset_if_missing for automatic download (or special function like for employment or add files to data folder by hand) 
-- datasetmanager: add a matching config with infos, attributes, anonymization levels
-- vorverarbeitung: look at the function clean_and_split_data and see if the dataset needs special cleaning or splitting for common usage
-
-add a privacy distribution
-- just run experiments or dataset creation with the percentage and everything will be created accordingly
-- for llm extra runs are needed for imputation and prediction results
-
-requirements_local: Python/3.9.6 packages needed for the project locally (cluster dependencies instead loaded and installed in job script)
-requirements_cluster: package list used on the cluster but without required llm packages (as loaded and installed on the cluster from the job script)
-
-
-
-llm:
-_.env_llm: fill this configuration file before running and then rename to just .env_llm. Add following info:
-    LLM_API_BASE_URL="..."
-    LLM_API_KEY="..."
-    LLM_MODEL="..."
-Pre-requisite: the original and anonymized datasets need to be stored already for use by the llm. either by downloading from zenodo or running the creation script
-given a dataset llm evaluation does two things to each the training and test sets:
-1. impute anonymized values and create resulting imputed dataset version (both steps saved as csv)
-2. directly predict the label of anonymized records (results saved as csv)
-result folders will be saved named as percentage_results to not overwrite existing results. when finished rename folder to only percentage as name for later use
-
-LLM Evaluation Scripts (run from project root):
-- llm_runs.sh: Launch multiple individual jobs with extra options
-- llm.job: SLURM job file for direct submission
-- llm_src/llm_evaluation_launcher.py: Starts jobs with extra functionality like partitioning
-- llm_src/llm_evaluation_merger.py: Takes finished partitioned runs and puts them together
-- llm_src/llm_evaluation.py: Main script for llm experiments
-- llm_src/llm_evaluation_test.ipynb: Notebook for smaller test runs
-- llm_src/merge_llm_results.py: Utility to merge partitioned results
-- .env_llm: Environment variables (LLM API URL, key, model)
-- requirements_llm.txt: Python packages needed for the llm run (assuming datasets are present)
-

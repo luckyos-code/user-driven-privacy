@@ -42,6 +42,7 @@ random.seed(RANDOM_SEED)
 # performance characteristics:
 # - OLD: creates intermediate files
 # - NEW: faster, no intermediate files
+# Note: old method needs files in data folder whose creation is currently commented out in DatasetCreation.py due to deprecation
 USE_RECORD_BASED_FILTERING = True  # Set to True to use NEW method
 
 # OBSERVED_VALUES_REF_SAMPLE: Controls which data is used to determine "observed" values for filtering.

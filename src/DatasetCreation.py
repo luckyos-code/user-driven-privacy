@@ -34,7 +34,7 @@ def download_employment_dataset(data_dir='data', state='CA', survey_year='2018')
     print(f"Downloading ACS Employment data for {state} ({survey_year})...")
     try:
         # Download ACS data
-        data_source = ACSDataSource(survey_year=survey_year, horizon='1-Year', survey='person')
+        data_source = ACSDataSource(survey_year=survey_year, horizon='1-Year', survey='person', root_dir=data_dir)
         acs_data = data_source.get_data(states=[state], download=True)
         print(f"Downloaded {len(acs_data)} records from ACS")
         
@@ -269,14 +269,14 @@ def create_dataset_versions(dataset, original_pct, generalized_pct, missing_pct,
             else:
                 print(f'Forced generalization for {dataset} already exists, skipping.')
             
-            # 4. Specialization
-            spec_check_file = os.path.join(dataset_dir, 'specialization', pct_str, 'age_vorverarbeitet.csv')
-            if not os.path.exists(spec_check_file):
-                print(f'Preprocessing: specialization for {dataset}...')
-                sys.stdout.flush()
-                prepare_specialization(dataset, data_dir, pct_str)
-            else:
-                print(f'Preprocessed data for specialization already exists, skipping.')
+            # 4. Specialization % TODO old specialization data as column files should only be created when not record based filtering
+            # spec_check_file = os.path.join(dataset_dir, 'specialization', pct_str, 'age_vorverarbeitet.csv')
+            # if not os.path.exists(spec_check_file):
+            #     print(f'Preprocessing: specialization for {dataset}...')
+            #     sys.stdout.flush()
+            #     prepare_specialization(dataset, data_dir, pct_str)
+            # else:
+            #     print(f'Preprocessed data for specialization already exists, skipping.')
             
             # Create completion marker
             with open(pct_complete_marker, 'w') as f:

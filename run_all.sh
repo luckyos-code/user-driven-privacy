@@ -5,15 +5,21 @@
 # be selective by commenting out appropriate rows in the arrays
 # also check the variable settings to fit your needs
 
+# Dataset download and processing location (can be changed for quota limits, especially due to dask-worker-space that will be located there)
+# Important: if changed, also update data location when doing LLM runs (as they load from data/ as default)
+DATA_DIR=$PWD/data
+
+# Batch submit controls: start N jobs then wait
+# Set batch_size to 0 to disable batching (no waits)
+# Example: batch_size=3; wait_seconds=3 -> start 3 runs, sleep 3s, continue
+batch_size=0
+wait_seconds=60
+
 TS=$(date '+%Y-%m-%d_%H:%M:%S');
 
 # Workspace must be allocated before starting the job (results will be stored here)
 WORK_DIR=$PWD/results/all-$TS
 mkdir -p $WORK_DIR
-
-# Dataset download and processing location (can be changed for quota limits)
-# Important: if changed, also update data location when doing LLM runs
-DATA_DIR=$PWD/data
 
  # Set to true if GPU is required
 use_gpu=false
@@ -25,12 +31,6 @@ enable_group_duplicates=false
 cache_only=false
 # filter or use fully specialized dataset
 filter_by_record_id=true
-
-# Batch submit controls: start N jobs then wait
-# Set batch_size to 0 to disable batching (no waits)
-# Example: batch_size=3; wait_seconds=3 -> start 3 runs, sleep 3s, continue
-batch_size=0
-wait_seconds=60
 
 # Control how train/test method pairs are selected. This is an array so you can enable multiple modes
 # in a single run. Comment out the one you don't need (same pattern as other arrays in this file).
