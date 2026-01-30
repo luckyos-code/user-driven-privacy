@@ -284,7 +284,7 @@ class RecordBasedSpecialization:
         if len(partition_df) == 0:
             return partition_df
         
-        all_results = []
+        all_results_dfs = []
         partition_variants_generated = 0
         partition_variants_kept = 0
         
@@ -305,7 +305,7 @@ class RecordBasedSpecialization:
                     # No generalized values - keep this single record
                     partition_variants_generated += 1
                     partition_variants_kept += 1
-                    all_results.append(record.to_dict())
+                    all_results_dfs.append(record.to_frame().T)
                     continue
             
             # Generate combinations using unified function with column-wise optimization
@@ -313,31 +313,36 @@ class RecordBasedSpecialization:
             # - random: generates EXACTLY n_duplicates complete variants (no filtering needed)
             # - imputation: reduces to top-N values per column, then Cartesian product, then filters
             # - knn: generates ALL combinations (row-based scoring, can't pre-select)
-            variants = self._generate_combinations(
+            variants_df = self._generate_combinations_as_dataframe(
                 record, 
                 n_duplicates=n_duplicates,
                 filtering_mode=filtering_mode,
                 column_profiles=column_profiles
             )
-            partition_variants_generated += len(variants)
+            partition_variants_generated += len(variants_df)
             
             # For imputation/KNN: filter after generation to select best n_duplicates
             # Random mode already generates exactly n_duplicates, no filtering needed
-            if filtering_mode in ['imputation', 'knn'] and n_duplicates and len(variants) > n_duplicates:
-                variants = self._apply_filtering(
-                    variants, record_id, n_duplicates, filtering_mode,
+            if filtering_mode in ['imputation', 'knn'] and n_duplicates and len(variants_df) > n_duplicates:
+                variants_df = self._apply_filtering_to_dataframe(
+                    variants_df, record_id, n_duplicates, filtering_mode,
                     column_profiles, knn_model, knn_preprocessor
                 )
             
-            partition_variants_kept += len(variants)
-            all_results.extend(variants)
+            partition_variants_kept += len(variants_df)
+            all_results_dfs.append(variants_df)
         
         # Log partition completion (helps track progress across workers)
         if partition_variants_generated > 0:
             reduction = (1 - partition_variants_kept/max(partition_variants_generated, 1))*100
             print(f"  Partition: {len(partition_df)} records → {partition_variants_generated:,} variants → {partition_variants_kept:,} kept ({reduction:.1f}% reduction)")
         
-        result_df = pd.DataFrame(all_results)
+        # Concatenate all DataFrames once (much faster than converting N times)
+        if all_results_dfs:
+            result_df = pd.concat(all_results_dfs, ignore_index=True)
+        else:
+            # Empty result with same schema
+            result_df = pd.DataFrame(columns=partition_df.columns)
         
         # Fix dtypes: convert numerical columns from object to numeric
         # This is crucial for XGBoost which requires proper dtypes
@@ -470,6 +475,31 @@ class RecordBasedSpecialization:
         else:
             # Default: return all or first n_values
             return possible_values[:n_values]
+    
+    def _generate_combinations_as_dataframe(self, record: pd.Series, n_duplicates: Optional[int] = None,
+                              filtering_mode: Optional[str] = None,
+                              column_profiles: Optional[Dict] = None) -> pd.DataFrame:
+        """
+        Generate combinations as DataFrame (optimized wrapper).
+        
+        Uses List[Dict] internally for cleaner Cartesian product logic, then converts once.
+        
+        Args:
+            record: Single record (pd.Series)
+            n_duplicates: Target number of variants (None = generate all)
+            filtering_mode: 'random', 'imputation', 'knn', or None
+            column_profiles: Feature profiles for imputation scoring
+            
+        Returns:
+            DataFrame with variants
+        """
+        # Generate as List[Dict] using existing logic (Cartesian product)
+        variants_list = self._generate_combinations(
+            record, n_duplicates, filtering_mode, column_profiles
+        )
+        
+        # Convert to DataFrame once (acceptable overhead, happens once per record)
+        return pd.DataFrame(variants_list)
     
     def _generate_combinations(self, record: pd.Series, n_duplicates: Optional[int] = None,
                               filtering_mode: Optional[str] = None,
@@ -633,12 +663,44 @@ class RecordBasedSpecialization:
         
         return variants
     
+    def _apply_filtering_to_dataframe(self, variants_df: pd.DataFrame, record_id, n_duplicates: int,
+                                      mode: str, column_profiles: Optional[Dict],
+                                      knn_model, knn_preprocessor) -> pd.DataFrame:
+        """
+        Apply filtering to DataFrame.
+        
+        Args:
+            variants_df: DataFrame with variants
+            record_id: Current record ID
+            n_duplicates: Number of variants to keep
+            mode: Filtering mode ('random', 'imputation', 'knn')
+            column_profiles: For imputation mode
+            knn_model: For KNN mode
+            knn_preprocessor: For KNN mode
+            
+        Returns:
+            Filtered DataFrame
+        """
+        if len(variants_df) <= n_duplicates:
+            return variants_df
+        
+        if mode == 'random' or mode is None:
+            return self._filter_random_df(variants_df, n_duplicates, record_id)
+        elif mode == 'imputation':
+            return self._filter_imputation_df(variants_df, n_duplicates, column_profiles)
+        elif mode == 'knn':
+            return self._filter_knn_df(variants_df, n_duplicates, knn_model, knn_preprocessor)
+        else:
+            raise ValueError(f"Unknown filtering mode: {mode}")
+    
     def _apply_filtering(self, variants: List[Dict], record_id, n_duplicates: int, 
                         mode: str, column_profiles: Optional[Dict],
                         knn_model, knn_preprocessor) -> List[Dict]:
         """
         Apply filtering to variants using specified mode.
         Uses same logic as FilteringHandler.py for equivalence.
+        
+        DEPRECATED: Use _apply_filtering_to_dataframe for better performance.
         
         Args:
             variants: List of variant dictionaries
@@ -664,8 +726,20 @@ class RecordBasedSpecialization:
         else:
             raise ValueError(f"Unknown filtering mode: {mode}")
     
+    def _filter_random_df(self, variants_df: pd.DataFrame, n_duplicates: int, record_id) -> pd.DataFrame:
+        """
+        Random sampling on DataFrame directly (optimized version).
+        Avoids List[Dict] conversions for better performance.
+        """
+        group_seed = self.seed + hash(str(record_id)) % 10000
+        return variants_df.sample(n=min(n_duplicates, len(variants_df)), random_state=group_seed)
+    
     def _filter_random(self, variants: List[Dict], n_duplicates: int, record_id) -> List[Dict]:
-        """Random sampling using FilteringHandler logic."""
+        """
+        Random sampling using FilteringHandler logic.
+        
+        DEPRECATED: Use _filter_random_df for better performance (avoids List[Dict] conversions).
+        """
         # Use same seed derivation as FilteringHandler for exact equivalence
         group_seed = self.seed + hash(str(record_id)) % 10000
         
@@ -674,9 +748,59 @@ class RecordBasedSpecialization:
         sampled_df = variants_df.sample(n=min(n_duplicates, len(variants)), random_state=group_seed)
         return sampled_df.to_dict('records')
     
+    def _filter_imputation_df(self, variants_df: pd.DataFrame, n_duplicates: int,
+                             column_profiles: Optional[Dict]) -> pd.DataFrame:
+        """
+        Profile-based filtering on DataFrame directly (optimized version).
+        Avoids List[Dict] conversions and uses vectorized hashing for better performance.
+        """
+        if not column_profiles:
+            return self._filter_random_df(variants_df, n_duplicates, 0)
+        
+        from src.FilteringHandler import FilteringHandler
+        
+        # Convert numeric columns to proper dtype based on profiles
+        # Do this BEFORE copying to avoid unnecessary copies
+        for col, profile in column_profiles.items():
+            if col in variants_df.columns and profile.get('type') == 'numeric':
+                variants_df[col] = pd.to_numeric(variants_df[col], errors='coerce')
+        
+        # Use FilteringHandler method to calculate similarities (vectorized)
+        similarity_scores = FilteringHandler._calculate_similarity_score_vectorized(
+            variants_df, column_profiles, self.record_id_col
+        )
+        
+        # Add scores (modify in place, then we only copy once at the end)
+        variants_df['_score'] = similarity_scores
+        
+        # Hash-based tie-breaking (optimized: use tuple of all values)
+        exclude_cols = {self.record_id_col}
+        if self.label_col:
+            exclude_cols.add(self.label_col)
+        hash_cols = sorted([c for c in variants_df.columns if c not in exclude_cols and c != '_score'])
+        
+        # Vectorized hashing: convert rows to tuples, then hash
+        # Much faster than .apply() row-by-row
+        variants_df['_tie_break'] = pd.util.hash_pandas_object(
+            variants_df[hash_cols], index=False
+        )
+        
+        # Sort and select
+        sorted_df = variants_df.sort_values(
+            by=['_score', '_tie_break'],
+            ascending=[False, True]
+        )
+        selected = sorted_df.head(n_duplicates).drop(['_score', '_tie_break'], axis=1)
+        
+        return selected
+    
     def _filter_imputation(self, variants: List[Dict], n_duplicates: int, 
                           column_profiles: Optional[Dict]) -> List[Dict]:
-        """Profile-based filtering using FilteringHandler._calculate_profile_similarity."""
+        """
+        Profile-based filtering using FilteringHandler._calculate_profile_similarity.
+        
+        DEPRECATED: Use _filter_imputation_df for better performance (avoids List[Dict] conversions).
+        """
         if not column_profiles:
             return self._filter_random(variants, n_duplicates, 0)
         
@@ -720,9 +844,49 @@ class RecordBasedSpecialization:
         
         return selected.to_dict('records')
     
+    def _filter_knn_df(self, variants_df: pd.DataFrame, n_duplicates: int,
+                      knn_model, knn_preprocessor) -> pd.DataFrame:
+        """
+        KNN-based filtering on DataFrame directly (optimized version).
+        Avoids List[Dict] conversions for better performance.
+        """
+        if not knn_model or not knn_preprocessor:
+            return self._filter_random_df(variants_df, n_duplicates, 0)
+        
+        try:
+            # Get feature columns (exclude record_id and label)
+            exclude_cols = {self.record_id_col}
+            if self.label_col:
+                exclude_cols.add(self.label_col)
+            feature_cols = [c for c in variants_df.columns if c not in exclude_cols]
+            
+            X = variants_df[feature_cols]
+            
+            # Preprocess
+            X_processed = knn_preprocessor.transform(X)
+            
+            # Get KNN distances
+            distances, _ = knn_model.kneighbors(X_processed)
+            mean_distances = distances.mean(axis=1)
+            
+            # Add distance column and select top n (in place modification)
+            variants_df['_knn_dist'] = mean_distances
+            
+            # Select top n by smallest distance
+            selected = variants_df.nsmallest(n_duplicates, '_knn_dist').drop('_knn_dist', axis=1)
+            return selected
+            
+        except Exception as e:
+            print(f"Warning: KNN filtering failed ({e}), falling back to random")
+            return self._filter_random_df(variants_df, n_duplicates, 0)
+    
     def _filter_knn(self, variants: List[Dict], n_duplicates: int,
                    knn_model, knn_preprocessor) -> List[Dict]:
-        """KNN-based filtering using FilteringHandler approach."""
+        """
+        KNN-based filtering using FilteringHandler approach.
+        
+        DEPRECATED: Use _filter_knn_df for better performance (avoids List[Dict] conversions).
+        """
         if not knn_model or not knn_preprocessor:
             return self._filter_random(variants, n_duplicates, 0)
         
