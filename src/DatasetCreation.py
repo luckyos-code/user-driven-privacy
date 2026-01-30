@@ -114,12 +114,15 @@ def download_dataset_if_missing(dataset_name, data_dir='data'):
         print(f"{dataset_name} dataset already exists at {dataset_path}")
 
 
-def create_dataset_versions(dataset, original_pct, generalized_pct, missing_pct, seed=42, data_dir='data'):
+def create_dataset_versions(dataset, original_pct, generalized_pct, missing_pct, seed=42, data_dir='data', filter_by_record_id=True):
     """
     Create all required dataset versions for a given dataset and percentage combination.
     Uses two locks:
     1. Dataset-level lock for download + clean/split (shared across all percentages)
     2. Percentage-level lock for generalization and preprocessing (per percentage)
+    
+    Args:
+        filter_by_record_id: Whether record-based filtering will be used (affects specialization file generation)
     """
     def pct_folder(o, g, m):
         return f"{int(round(o*100))}-{int(round(g*100))}-{int(round(m*100))}"
@@ -221,6 +224,18 @@ def create_dataset_versions(dataset, original_pct, generalized_pct, missing_pct,
     
     # Check if everything is already done
     if os.path.exists(pct_complete_marker):
+        # Even if marker exists, check if specialization files are needed and missing
+        from src.Main import USE_RECORD_BASED_FILTERING
+        # Specialization files needed if either flag indicates file-based approach
+        need_specialization_files = not USE_RECORD_BASED_FILTERING or not filter_by_record_id
+        if need_specialization_files:
+            spec_check_file = os.path.join(dataset_dir, 'specialization', pct_str, 'age_vorverarbeitet.csv')
+            if not os.path.exists(spec_check_file):
+                # Need to generate specialization files (mode changed or explicitly requested)
+                print(f'Specialization files missing (mode changed or filter_by_record_id=False). Generating specialization data...')
+                sys.stdout.flush()
+                prepare_specialization(dataset, data_dir, pct_str)
+                print(f'Specialization data generation completed.')
         print(f'All data for {dataset} ({pct_str}) already exists, skipping.')
         return
     
@@ -269,14 +284,21 @@ def create_dataset_versions(dataset, original_pct, generalized_pct, missing_pct,
             else:
                 print(f'Forced generalization for {dataset} already exists, skipping.')
             
-            # 4. Specialization % TODO old specialization data as column files should only be created when not record based filtering
-            # spec_check_file = os.path.join(dataset_dir, 'specialization', pct_str, 'age_vorverarbeitet.csv')
-            # if not os.path.exists(spec_check_file):
-            #     print(f'Preprocessing: specialization for {dataset}...')
-            #     sys.stdout.flush()
-            #     prepare_specialization(dataset, data_dir, pct_str)
-            # else:
-            #     print(f'Preprocessed data for specialization already exists, skipping.')
+            # 4. Specialization (only for old file-based approach, not for record-based filtering)
+            # Record-based filtering generates specialization data on-the-fly, so we don't need these files
+            from src.Main import USE_RECORD_BASED_FILTERING
+            # Generate specialization files if either flag indicates file-based approach will be used
+            need_specialization_files = not USE_RECORD_BASED_FILTERING or not filter_by_record_id
+            if need_specialization_files:
+                spec_check_file = os.path.join(dataset_dir, 'specialization', pct_str, 'age_vorverarbeitet.csv')
+                if not os.path.exists(spec_check_file):
+                    print(f'Preprocessing: specialization for {dataset}...')
+                    sys.stdout.flush()
+                    prepare_specialization(dataset, data_dir, pct_str)
+                else:
+                    print(f'Preprocessed data for specialization already exists, skipping.')
+            else:
+                print(f'Skipping specialization file generation (using record-based filtering with filter_by_record_id=True)')
             
             # Create completion marker
             with open(pct_complete_marker, 'w') as f:

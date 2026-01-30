@@ -43,7 +43,7 @@ random.seed(RANDOM_SEED)
 # - OLD: creates intermediate files
 # - NEW: faster, no intermediate files
 # Note: old method needs files in data folder whose creation is currently commented out in DatasetCreation.py due to deprecation
-USE_RECORD_BASED_FILTERING = True  # Set to True to use NEW method
+USE_RECORD_BASED_FILTERING = True  # Set to True to use NEW method (not file-based but in-memory record-based)
 
 # OBSERVED_VALUES_REF_SAMPLE: Controls which data is used to determine "observed" values for filtering.
 # - False:              Do not limit to observed values (use all possible values from hierarchy).
@@ -310,8 +310,9 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
             # RecordBasedSpecialization will handle data generation directly from generalized reference
             print("Skipping file-based specialization preprocessing (using record-based filtering)")
             
-            # Calculate upper bound stats without actually merging data
-            data_loader.calculate_specialization_stats_only(columns, train_method, test_method)
+            # Calculate upper bound stats directly from generalized reference data
+            # (without needing specialization column files from old method)
+            data_loader.calculate_specialization_stats_from_generalized(columns, train_method, test_method)
             
             # For non-specialization parts, we still need to load the data normally
             # e.g., if train_method=original but test_method=specialization

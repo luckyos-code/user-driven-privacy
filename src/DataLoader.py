@@ -320,6 +320,12 @@ class DataLoader:
         
         for i, column in enumerate(columns):
             file_path = os.path.join(path, f"{column.name}_vorverarbeitet.csv")
+            
+            # Skip if specialization files don't exist (when using record-based filtering only)
+            if not os.path.exists(file_path):
+                print(f"Specialization files not found - skipping stats calculation (record-based filtering will generate data on-the-fly)")
+                return
+            
             preprocessed = pd.read_csv(file_path)
             
             record_id_col = self.config["record_id_column"]
@@ -362,6 +368,115 @@ class DataLoader:
                     tracker['per_record_counts'] = new_per_record
                 
                 tracker['current_upper_bound'] = sum(tracker['per_record_counts'].values())
+            
+            print(f"Stats computed for column {i+1}/{len(columns)}: {column.name}")
+        
+        # Print summary
+        if train_is_spec:
+            train_rows = self.row_count_tracker[DatasetPart.TRAIN]['current_upper_bound']
+            print(f"Train upper bound: {train_rows:,} rows")
+        if test_is_spec:
+            test_rows = self.row_count_tracker[DatasetPart.TEST]['current_upper_bound']
+            print(f"Test upper bound: {test_rows:,} rows")
+
+    def calculate_specialization_stats_from_generalized(self, columns, train_method: PreparingMethod = None,
+                                                        test_method: PreparingMethod = None):
+        """
+        Calculate upper bound row counts for record-based specialization WITHOUT specialization files.
+        Instead, compute variant counts directly from generalized reference data by expanding
+        generalized values according to the hierarchy.
+        
+        This is used when USE_RECORD_BASED_FILTERING=True and specialization files don't exist.
+        
+        Args:
+            columns: List of column enums to process
+            train_method: Method for training data (if specialization, compute stats)
+            test_method: Method for test data (if specialization, compute stats)
+        """
+        train_is_spec = train_method and "specialization" in train_method.name
+        test_is_spec = test_method and "specialization" in test_method.name
+        
+        if not train_is_spec and not test_is_spec:
+            return  # Nothing to compute
+        
+        print("Calculating specialization upper bounds from generalized data (record-based filtering)...")
+        
+        for i, column in enumerate(columns):
+            # Process train data if needed
+            if train_is_spec:
+                tracker = self.row_count_tracker[DatasetPart.TRAIN]
+                ref_data = self.data_train_generalized_reference
+                
+                # Calculate variants per record by expanding each generalized value
+                record_id_col = self.config["record_id_column"]
+                counts_per_record = {}
+                
+                for _, row in ref_data.iterrows():
+                    record_id = row[record_id_col]
+                    generalized_value = row[column.name]
+                    
+                    # Get specialized variants for this generalized value
+                    variants = column.get_value(generalized_value) if hasattr(column, 'get_value') else [generalized_value]
+                    if variants is None:
+                        variants = [generalized_value]
+                    
+                    variant_count = len(variants) if isinstance(variants, list) else 1
+                    counts_per_record[record_id] = counts_per_record.get(record_id, 1) * variant_count
+                
+                # Initialize or multiply existing counts
+                if tracker['per_record_counts'] is None:
+                    tracker['per_record_counts'] = counts_per_record
+                else:
+                    # Multiply existing counts by new counts
+                    new_per_record = {}
+                    for record_id in tracker['per_record_counts']:
+                        current_count = tracker['per_record_counts'][record_id]
+                        new_count = counts_per_record.get(record_id, 1)
+                        new_per_record[record_id] = current_count * new_count
+                    tracker['per_record_counts'] = new_per_record
+                
+                tracker['current_upper_bound'] = sum(tracker['per_record_counts'].values())
+                
+                avg_multiplier = sum(counts_per_record.values()) / len(counts_per_record) if counts_per_record else 1.0
+                tracker['merge_multipliers'].append(avg_multiplier)
+            
+            # Process test data if needed
+            if test_is_spec:
+                tracker = self.row_count_tracker[DatasetPart.TEST]
+                ref_data = self.data_test_generalized_reference
+                
+                # Calculate variants per record by expanding each generalized value
+                record_id_col = self.config["record_id_column"]
+                counts_per_record = {}
+                
+                for _, row in ref_data.iterrows():
+                    record_id = row[record_id_col]
+                    generalized_value = row[column.name]
+                    
+                    # Get specialized variants for this generalized value
+                    variants = column.get_value(generalized_value) if hasattr(column, 'get_value') else [generalized_value]
+                    if variants is None:
+                        variants = [generalized_value]
+                    
+                    variant_count = len(variants) if isinstance(variants, list) else 1
+                    counts_per_record[record_id] = counts_per_record.get(record_id, 1) * variant_count
+                
+                # Initialize or multiply existing counts
+                if tracker['per_record_counts'] is None:
+                    tracker['per_record_counts'] = counts_per_record
+                else:
+                    # Multiply existing counts by new counts
+                    new_per_record = {}
+                    for record_id in tracker['per_record_counts']:
+                        current_count = tracker['per_record_counts'][record_id]
+                        new_count = counts_per_record.get(record_id, 1)
+                        new_per_record[record_id] = current_count * new_count
+                    tracker['per_record_counts'] = new_per_record
+                
+                tracker['current_upper_bound'] = sum(tracker['per_record_counts'].values())
+                
+                avg_multiplier = sum(counts_per_record.values()) / len(counts_per_record) if counts_per_record else 1.0
+                tracker['merge_multipliers'].append(avg_multiplier)
             
             print(f"Stats computed for column {i+1}/{len(columns)}: {column.name}")
         

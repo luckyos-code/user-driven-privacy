@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser.add_argument('--group_duplicates', action='store_true', help='Whether to deduplicate records')
     parser.add_argument('--use_gpu', action='store_true', help='Whether to use GPU accelartion')
     parser.add_argument('--n_workers', required=True, help='Size of dask cluster to use')
-    parser.add_argument('--filter_by_record_id', action='store_true', help='Whether to filter by record id')
+    parser.add_argument('--filter_by_record_id', action='store_false', help='Whether to filter by record id - however filtering by column is deprecated')
     parser.add_argument('--percentages', required=True, help='Percentages for the dataset split')
     parser.add_argument('--cache_only', action='store_true', help='Whether to only prepare and cache datasets without running evaluations')
     args = parser.parse_args()
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     print(f"Preparing data for {args.dataset} with {pct_str} split...")
     seed=42
-    create_dataset_versions(args.dataset, original_pct, generalized_pct, missing_pct, seed, args.data_dir)
+    create_dataset_versions(args.dataset, original_pct, generalized_pct, missing_pct, seed, args.data_dir, filter_by_record_id=args.filter_by_record_id)
 
     # Run the evaluation with the provided parameters
     run_evaluation(
