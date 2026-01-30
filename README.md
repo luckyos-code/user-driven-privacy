@@ -2,24 +2,24 @@
 
 ### Paper
 
-This repository contains the codebase for the paper: **[Learning from Anonymized and Incomplete Tabular Data](TODO)**
+This repository contains the codebase for the paper: **[tbd](tbd)**
 
 ```bibtex
-@article{TODO,
+@article{tbd,
   title={...},
   author={...},
   journal={...},
   year={...}
 }
 ```
-### Abstract TODO
+### Abstract
 ```
-User-driven privacy allows individuals to control whether and at what granularity their data is shared, leading to datasets that mix original, generalized, and missing values within the same records and attributes. While such representations are intuitive for privacy, they pose challenges for machine learning, which typically treats non-original values as new categories or as missing, thereby discarding generalization semantics. For learning from such tabular data, we propose novel data transformation strategies that account for heterogeneous anonymizations and evaluate them alongside standard imputation and LLM–based approaches. We employ multiple datasets, privacy configurations, and deployment scenarios, demonstrating that our method reliably regains utility. Our results show that generalized values are preferable to pure suppression, that the best preparation strategy depends on the scenario, and that consistent data representations are crucial for maintaining downstream utility. Overall, our findings highlight that effective learning is tied to the appropriate handling of anonymized values.
+User-driven privacy allows individuals to control whether and at what granularity their data is shared, leading to datasets that mix original, generalized, and missing values within the same records and attributes. While such representations are intuitive for privacy, they pose challenges for machine learning, which typically treats non-original values as new categories or as missing, thereby discarding generalization semantics. For learning from such tabular data, we propose novel data transformation strategies that account for heterogeneous anonymizations and evaluate them alongside standard imputation and LLM–based approaches. We employ multiple datasets, privacy configurations, and deployment scenarios, demonstrating that our method reliably regains utility. Our results show that generalized values are preferable to pure suppression, that the best data preparation strategy depends on the scenario, and that consistent data representations are crucial for maintaining downstream utility. Overall, our findings highlight that effective learning is tied to the appropriate handling of anonymized values.
 ```
 
 ### Reference Data
 
-The (anonymized) datasets and LLM imputation/prediction results used in our experiments are publicly available at: [ZENODO](https://doi.org/10.5281/zenodo.18405312)
+The (anonymized) datasets and LLM imputation/prediction results used in our experiments are publicly available at: **[Zenodo](https://doi.org/10.5281/zenodo.18405312)**
 
 Alternatively, generate the datasets anew by following the instructions below.
 
@@ -45,12 +45,12 @@ Alternatively, generate the datasets anew by following the instructions below.
   - `{dataset}/`: Original dataset files
   - `{dataset}/generalization/{percentage}/`: Anonymized datasets for each privacy distribution
   - `{dataset}/forced_generalization/{percentage}/`: Forced generalization preparation output
-  - `{dataset}/specialization/{percentage}/`: Optional pre-generated specialization datasets (normally created in-memory during experiments)
+  - `{dataset}/specialization/{percentage}/`: Optional pre-generated specialization datasets (created in-memory during experiments anyways)
 - `llm_evaluation/`: LLM evaluation outputs
   - `{percentage}_results/`: Intermediate evaluation results (rename to `{percentage}/` when complete)
   - `{percentage}/`: Final results used by model evaluation
 - `llm_slurm_logs/`: Slurm job logs for LLM experiments
-- `results/`: Experiment run outputs
+- `results/`: Overall experiment run outputs
 - `slurm_logs/`: Slurm job logs for overall experiments
 
 ## Environment and Installation
