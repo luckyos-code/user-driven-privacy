@@ -2,10 +2,10 @@
 
 ### Paper
 
-This repository contains the codebase for the paper: **[tbd](tbd)**
+This repository contains the codebase for the paper: **[tbd.]()**
 
 ```bibtex
-@article{tbd,
+@article{tbd.,
   title={...},
   author={...},
   journal={...},
