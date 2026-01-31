@@ -119,6 +119,40 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
         redo_cache: If True, force recomputation of cache even if it exists
         verify_row_counts: If True, verify calculated row counts against actual (slow but validates accuracy)
     """
+    # Fix for macOS: Set XGBoost tracker environment variables before creating cluster
+    # This prevents hostname resolution errors on macOS when using DaskXGBoost
+    job_id = os.environ.get('SLURM_JOB_ID')
+    if not job_id:
+        print("Detected local environment (not SLURM), applying XGBoost macOS compatibility fix")
+        os.environ['DMLC_TRACKER_URI'] = '127.0.0.1'
+        os.environ['DMLC_TRACKER_PORT'] = '9091'
+        
+        # Monkey-patch socket module to make hostname resolution work on macOS
+        # XGBoost's tracker tries to resolve hostname which often fails on macOS
+        import socket
+        _original_gethostname = socket.gethostname
+        _original_getfqdn = socket.getfqdn
+        _original_gethostbyname = socket.gethostbyname
+        
+        def _patched_gethostname():
+            try:
+                return _original_gethostname()
+            except:
+                return 'localhost'
+        
+        def _patched_getfqdn(name=''):
+            return 'localhost'
+        
+        def _patched_gethostbyname(hostname):
+            if hostname in ('localhost', socket.gethostname()):
+                return '127.0.0.1'
+            return _original_gethostbyname(hostname)
+        
+        socket.gethostname = _patched_gethostname
+        socket.getfqdn = _patched_getfqdn
+        socket.gethostbyname = _patched_gethostbyname
+        print("Applied socket module patches for macOS compatibility")
+    
     # Set global seeds
     np.random.seed(random_seed)
     random.seed(random_seed)
@@ -222,8 +256,16 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
     preload_results = client.run(_preload_dask_modules)
     print(f"Preloaded dask modules on {len(preload_results)} workers")
     
+    # Determine if we're actually using specialization with filtering
+    # Only add _filter suffix to filenames for specialization runs
+    use_filter_suffix = (
+        filter_by_record_id and 
+        any(method and "specialization" in method.name 
+            for method in [train_method, test_method] if method)
+    )
+    
     # Initialize results handler with experiment config
-    results_io_handler = ResultsIOHandler(save_dir, dataset, train_method, test_method, group_duplicates, filter_by_record_id, percentages)
+    results_io_handler = ResultsIOHandler(save_dir, dataset, train_method, test_method, group_duplicates, use_filter_suffix, percentages)
     results_io_handler.set_experiment_config(experiment_config)
 
     # Determine if we're using weighted methods
@@ -1105,7 +1147,10 @@ def evaluate_model(dataset, data_train, data_test, client, weighted=False, highe
         
     except Exception as e:
         print(f"WARNING: Model training failed: {str(e)}")
-        print("This typically happens when training data is empty (e.g., n_duplicates=0 with all generalized/missing values)")
+        if "empty" in str(e).lower() or "no samples" in str(e).lower():
+            print("This typically happens when training data is empty (e.g., n_duplicates=0 with all generalized/missing values)")
+        elif "Can't assign requested address" in str(e):
+            print("This is a network binding issue. If on macOS with LocalCluster, try setting DMLC_TRACKER_URI=127.0.0.1")
         
         # Return null metrics to indicate training failure (null is valid JSON, not NaN)
         metrics = {
