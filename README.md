@@ -27,7 +27,8 @@ Alternatively, generate the datasets anew by following the instructions below.
 
 **Main Scripts and Locations:**
 -   `run_all.sh`, `run.job`, `run.py`: The main scripts to running the general experiments with different configurations.
--   `ll_runs.sh`, `llm.job`, `llm_src/`: scripts for LLM evaluation.
+-   `llm_runs.sh`, `llm.job`, `llm_src/`: scripts for LLM evaluation.
+- `_.env_llm`, `.env_llm`: Environment variables for LLM (API URL, key, model), fill and rename from `_.env_llm` to `.env_llm`
 -   `requirements_*.txt`: Needed packages for installation.
 -   `DatasetCreation.ipynb`: Notebook for individual generation of original and anonymized datasets
 -   `DatasetCreation_Specialization.ipynb`: Notebook for individual generation of specialized datasets with filtering (optional, normally handled in-memory during experiments)
@@ -166,7 +167,6 @@ bash llm_runs.sh merge "33-33-34" "Employment" 3
 ```
 
 Other than the top-level job scripts, the subfolder `llm_src/` contains the LLM-related scripts:
-- `.env_llm`: Environment variables (LLM API URL, key, model), fill and rename from `_.env_llm`
 - `llm_runs.sh`: Shell wrapper for launching multiple LLM-related jobs with extra options
 - `llm.job`: Slurm job definition file
 - `llm_src/llm_evaluation.py`: Main LLM evaluation script
