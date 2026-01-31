@@ -49,11 +49,14 @@ if __name__ == '__main__':
     seed=42
     create_dataset_versions(args.dataset, original_pct, generalized_pct, missing_pct, seed, args.data_dir, filter_by_record_id=args.filter_by_record_id)
 
+    # Add dataset subdirectory to save_dir (matches behavior in run.job)
+    save_dir_with_dataset = os.path.join(args.save_dir, args.dataset)
+    
     # Run the evaluation with the provided parameters
     run_evaluation(
         n_workers=args.n_workers,
         use_gpu=args.use_gpu,
-        save_dir=args.save_dir,
+        save_dir=save_dir_with_dataset,
         data_dir=args.data_dir,
         dataset=args.dataset,
         train_method=train_method,
