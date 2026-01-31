@@ -1,0 +1,193 @@
+# Python/3.9.6
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.0
+aiosignal==1.4.0
+alabaster @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/alabaster/alabaster-0.7.12
+appdirs @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/appdirs/appdirs-1.4.4
+asn1crypto @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/asn1crypto/asn1crypto-1.4.0
+async-timeout==5.0.1
+atomicwrites @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/atomicwrites/atomicwrites-1.4.0
+attrs @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/attrs/attrs-21.2.0
+Babel @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/Babel/Babel-2.9.1
+backports.entry-points-selectable @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/backportsentry_points_selectable/backports.entry_points_selectable-1.1.0
+backports.functools-lru-cache @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/backportsfunctools_lru_cache/backports.functools_lru_cache-1.6.4
+bcrypt @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/bcrypt/bcrypt-3.2.0
+beniget @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/beniget/beniget-0.4.1
+bitstring @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/bitstring/bitstring-3.1.9
+blist @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/blist/blist-1.3.6
+bokeh @ file:///lscratch/eb/build/bokeh/2.4.2/foss-2021b/bokeh/bokeh-2.4.2
+Bottleneck @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/Bottleneck/Bottleneck-1.3.2
+CacheControl @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/CacheControl/CacheControl-0.12.6
+cachy @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/cachy/cachy-0.3.0
+certifi @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/certifi/certifi-2021.5.30
+cffi @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/cffi/cffi-1.14.6
+chardet @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/chardet/chardet-4.0.0
+charset-normalizer @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/charsetnormalizer/charset-normalizer-2.0.4
+cleo @ file:///software/easybuild/sources/p/Python/extensions/cleo-0.8.1-py2.py3-none-any.whl
+click @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/click/click-8.0.1
+clikit @ file:///software/easybuild/sources/p/Python/extensions/clikit-0.6.2-py2.py3-none-any.whl
+cloudpickle @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/cloudpickle/cloudpickle-2.0.0
+colorama @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/colorama/colorama-0.4.4
+cramjam==2.11.0
+crashtest @ file:///software/easybuild/sources/p/Python/extensions/crashtest-0.3.1-py3-none-any.whl
+cryptography @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/cryptography/cryptography-3.4.7
+cycler @ file:///lscratch/eb/build/matplotlib/3.4.3/foss-2021b/Cycler/cycler-0.11.0
+Cython @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/Cython/Cython-0.29.24
+dask @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/dask/dask-2022.1.0
+dask-jobqueue @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/daskjobqueue/dask-jobqueue-0.7.3
+dask-mpi @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/daskmpi/dask-mpi-2021.11.0
+deap @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/deap/deap-1.3.1
+decorator @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/decorator/decorator-5.0.9
+distlib @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/distlib/distlib-0.3.2
+distributed @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/distributed/distributed-2022.1.0
+docopt @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/docopt/docopt-0.6.2
+docrep @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/docrep/docrep-0.3.2
+docutils @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/docutils/docutils-0.17.1
+ecdsa @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/ecdsa/ecdsa-0.17.0
+fastparquet==2024.11.0
+filelock @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/filelock/filelock-3.0.12
+flit @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/flit/flit-3.3.0
+flit_core @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/flitcore/flit_core-3.3.0
+folktables==0.0.12
+fonttools==4.57.0
+frozenlist==1.8.0
+fsspec @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/fsspec/fsspec-2021.7.0
+future @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/future/future-0.18.2
+gast @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/gast/gast-0.5.2
+glob2 @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/glob2/glob2-0.7
+h5py==3.11.0
+HeapDict @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/HeapDict/HeapDict-1.0.1
+html5lib @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/html5lib/html5lib-1.1
+idna @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/idna/idna-3.2
+imagesize @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/imagesize/imagesize-1.2.0
+importlib-metadata @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/importlib_metadata/importlib_metadata-4.6.3
+importlib-resources @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/importlib_resources/importlib_resources-5.2.2
+iniconfig @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/iniconfig/iniconfig-1.1.1
+intervaltree @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/intervaltree/intervaltree-3.1.0
+intreehooks @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/intreehooks/intreehooks-1.0
+ipaddress @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/ipaddress/ipaddress-1.0.23
+jeepney @ file:///software/easybuild/sources/p/Python/extensions/jeepney-0.7.1-py3-none-any.whl
+Jinja2 @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/Jinja2/Jinja2-3.0.1
+joblib==1.4.2
+jsonschema @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/jsonschema/jsonschema-3.2.0
+keyring @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/keyring/keyring-21.2.0
+keyrings.alt @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/keyringsalt/keyrings.alt-4.1.0
+kiwisolver @ file:///lscratch/eb/build/matplotlib/3.4.3/foss-2021b/kiwisolver/kiwisolver-1.3.2
+liac-arff @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/liacarff/liac-arff-2.5.0
+locket @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/locket/locket-0.2.1
+lockfile @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/lockfile/lockfile-0.12.2
+MarkupSafe @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/MarkupSafe/MarkupSafe-2.0.1
+matplotlib @ file:///lscratch/eb/build/matplotlib/3.4.3/foss-2021b/matplotlib/matplotlib-3.4.3
+mock @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/mock/mock-4.0.3
+more-itertools @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/moreitertools/more-itertools-8.8.0
+mpi4py @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/mpi4py/mpi4py-3.1.1
+mpmath @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/mpmath/mpmath-1.2.1
+msgpack @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/msgpack/msgpack-1.0.2
+multidict==6.7.0
+netaddr @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/netaddr/netaddr-0.8.0
+netifaces @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/netifaces/netifaces-0.11.0
+networkx==3.2.1
+nose @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/nose/nose-1.3.7
+numexpr @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/numexpr/numexpr-2.7.3
+numpy @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/numpy/numpy-1.21.3
+nvidia-cublas-cu12==12.4.5.8
+nvidia-cuda-cupti-cu12==12.4.127
+nvidia-cuda-nvrtc-cu12==12.4.127
+nvidia-cuda-runtime-cu12==12.4.127
+nvidia-cudnn-cu12==9.1.0.70
+nvidia-cufft-cu12==11.2.1.3
+nvidia-curand-cu12==10.3.5.147
+nvidia-cusolver-cu12==11.6.1.9
+nvidia-cusparse-cu12==12.3.1.170
+nvidia-cusparselt-cu12==0.6.2
+nvidia-nccl-cu12==2.21.5
+nvidia-nvjitlink-cu12==12.4.127
+nvidia-nvtx-cu12==12.4.127
+packaging==25.0
+pandas @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/pandas/pandas-1.3.4
+paramiko @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/paramiko/paramiko-2.7.2
+partd @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/partd/partd-1.2.0
+pastel @ file:///software/easybuild/sources/p/Python/extensions/pastel-0.2.1-py2.py3-none-any.whl
+pathlib2 @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pathlib2/pathlib2-2.3.6
+paycheck @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/paycheck/paycheck-1.0.2
+pbr @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pbr/pbr-5.6.0
+pexpect @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pexpect/pexpect-4.8.0
+Pillow==8.3.2
+pkginfo @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pkginfo/pkginfo-1.7.1
+platformdirs @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/platformdirs/platformdirs-2.2.0
+pluggy @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pluggy/pluggy-0.13.1
+ply @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/ply/ply-3.11
+poetry @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/poetry/poetry-1.1.7
+poetry-core @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/poetrycore/poetry-core-1.0.3
+propcache==0.4.1
+protobuf==4.21.12
+psutil @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/psutil/psutil-5.8.0
+ptyprocess @ file:///software/easybuild/sources/p/Python/extensions/ptyprocess-0.7.0-py2.py3-none-any.whl
+py @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/py/py-1.10.0
+py-expression-eval @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/py_expression_eval/py_expression_eval-0.3.13
+pyasn1 @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pyasn1/pyasn1-0.4.8
+pybind11 @ file:///lscratch/eb/build/pybind11/2.7.1/GCCcore-11.2.0/pybind11-2.7.1
+pycparser @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pycparser/pycparser-2.20
+pycrypto @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pycrypto/pycrypto-2.6.1
+Pygments @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/Pygments/Pygments-2.9.0
+pylev @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pylev/pylev-1.4.0
+PyNaCl @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/PyNaCl/PyNaCl-1.4.0
+pyparsing @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pyparsing/pyparsing-2.4.7
+pyrsistent @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pyrsistent/pyrsistent-0.18.0
+pytest @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pytest/pytest-6.2.4
+python-dateutil==2.9.0.post0
+pythran @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/pythran/pythran-0.10.0
+pytoml @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/pytoml/pytoml-0.1.21
+pytz==2025.2
+PyYAML @ file:///lscratch/eb/build/PyYAML/5.4.1/GCCcore-11.2.0/PyYAML-5.4.1
+regex @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/regex/regex-2021.8.3
+requests @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/requests/requests-2.26.0
+requests-toolbelt @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/requeststoolbelt/requests-toolbelt-0.9.1
+scandir @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/scandir/scandir-1.10.0
+scikit-learn==1.2.2
+scipy @ file:///lscratch/eb/build/SciPybundle/2021.10/foss-2021b/scipy/scipy-1.7.1
+seaborn==0.13.2
+SecretStorage @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/SecretStorage/SecretStorage-3.3.1
+semantic-version @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/semantic_version/semantic_version-2.8.5
+setuptools-rust @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/setuptoolsrust/setuptools-rust-0.12.1
+setuptools-scm @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/setuptools_scm/setuptools_scm-6.0.1
+shellingham @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/shellingham/shellingham-1.4.0
+simplegeneric @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/simplegeneric/simplegeneric-0.8.1
+simplejson @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/simplejson/simplejson-3.17.3
+six @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/six/six-1.16.0
+snowballstemmer @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/snowballstemmer/snowballstemmer-2.1.0
+sortedcontainers @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/sortedcontainers/sortedcontainers-2.4.0
+Sphinx @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/Sphinx/Sphinx-4.1.2
+sphinx-bootstrap-theme @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/sphinxbootstraptheme/sphinx-bootstrap-theme-0.7.1
+sphinxcontrib-applehelp @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/sphinxcontribapplehelp/sphinxcontrib-applehelp-1.0.2
+sphinxcontrib-devhelp @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/sphinxcontribdevhelp/sphinxcontrib-devhelp-1.0.2
+sphinxcontrib-htmlhelp @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/sphinxcontribhtmlhelp/sphinxcontrib-htmlhelp-2.0.0
+sphinxcontrib-jsmath @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/sphinxcontribjsmath/sphinxcontrib-jsmath-1.0.1
+sphinxcontrib-qthelp @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/sphinxcontribqthelp/sphinxcontrib-qthelp-1.0.3
+sphinxcontrib-serializinghtml @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/sphinxcontribserializinghtml/sphinxcontrib-serializinghtml-1.1.5
+sphinxcontrib-websupport @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/sphinxcontribwebsupport/sphinxcontrib-websupport-1.2.4
+sympy==1.13.1
+tabulate @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/tabulate/tabulate-0.8.9
+tblib @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/tblib/tblib-1.7.0
+threadpoolctl==3.6.0
+toml @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/toml/toml-0.10.2
+tomlkit @ file:///software/easybuild/sources/p/Python/extensions/tomlkit-0.7.2-py2.py3-none-any.whl
+toolz @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/toolz/toolz-0.11.2
+torch==2.6.0
+tornado @ file:///lscratch/eb/build/bokeh/2.4.2/foss-2021b/tornado/tornado-6.1
+tqdm==4.64.0
+traitlets==5.2.2.post1
+triton==3.2.0
+typing_extensions==4.13.2
+tzdata==2025.2
+ujson @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/ujson/ujson-4.0.2
+urllib3 @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/urllib3/urllib3-1.26.6
+virtualenv @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/virtualenv/virtualenv-20.7.0
+wcwidth @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/wcwidth/wcwidth-0.2.5
+webencodings @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/webencodings/webencodings-0.5.1
+xgboost==2.0.3
+xlrd @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/xlrd/xlrd-2.0.1
+yarl==1.22.0
+zict @ file:///lscratch/eb/build/dask/2022.1.0/foss-2021b/zict/zict-2.0.0
+zipfile36 @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/zipfile36/zipfile36-0.1.3
+zipp @ file:///lscratch/eb/build/Python/3.9.6/GCCcore-11.2.0/zipp/zipp-3.5.0

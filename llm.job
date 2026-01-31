@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#SBATCH --time=48:00:00
+#SBATCH --mem=64G
+#SBATCH --ntasks=1
+#SBATCH --job-name=llm_evaluation
+#SBATCH --partition=paula
+#SBATCH --output=llm_slurm_logs/%j/stdout.out
+#SBATCH --error=llm_slurm_logs/%j/stderr.err
+
+module load JupyterLab/4.2.5-GCCcore-13.3.0
+module load Python/3.12.3-GCCcore-13.3.0
+
+pip install aiohttp dotenv
+
+# example cluster job: sbatch --export=ALL,PERCENTAGE=33-33-34,DATASETS=Adult-Diabetes-German,BATCH_SIZE=10,INPUT_DIR=/work/user-driven,RESULTS_BASE=llm_evaluation llm.job
+# for employment dataset use llm_runs.sh for partitioning or like this changing 1/4 accordingly each time: sbatch --export=ALL,PERCENTAGE=33-33-34,DATASETS=Employment,BATCH_SIZE=10,INPUT_DIR=/work/user-driven,RESULTS_BASE=llm_evaluation,PARTITION=1/4 llm.job
+export PERCENTAGE="${PERCENTAGE:-33-33-34}"
+export DATASETS="${DATASETS:-Adult-Diabetes-German-Employment}"
+export INPUT_DIR="${INPUT_DIR:-data}"
+export RESULTS_BASE="${RESULTS_BASE:-llm_evaluation}"
+export PARTITION="${PARTITION:-}"
+export BATCH_SIZE="${BATCH_SIZE:-1}"
+export CONCURRENCY="${CONCURRENCY:-20}"
+echo "Running llm evaluation with PERCENTAGE=${PERCENTAGE}, DATASETS=${DATASETS}, INPUT_DIR=${INPUT_DIR}, RESULTS_BASE=${RESULTS_BASE}, PARTITION=${PARTITION}, BATCH_SIZE=${BATCH_SIZE}, CONCURRENCY=${CONCURRENCY}"
+
+if [ -n "$PARTITION" ]; then
+    python llm_src/llm_evaluation.py --percentage ${PERCENTAGE} --datasets ${DATASETS} --input-dir "${INPUT_DIR}" --results-base "${RESULTS_BASE}" --partition "${PARTITION}" --batch-size ${BATCH_SIZE} --concurrency ${CONCURRENCY}
+else
+    python llm_src/llm_evaluation.py --percentage ${PERCENTAGE} --datasets ${DATASETS} --input-dir "${INPUT_DIR}" --results-base "${RESULTS_BASE}" --batch-size ${BATCH_SIZE} --concurrency ${CONCURRENCY}
+fi
