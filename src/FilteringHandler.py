@@ -320,7 +320,7 @@ class FilteringHandler:
         Much faster than row-by-row processing for large datasets.
         """
         # Initialize scores array
-        scores = np.zeros(len(df))
+        scores = np.zeros(len(df), dtype=np.float32)  # Use float32 instead of float64 (faster, less memory)
         feature_count = len(feature_profiles)
         
         # Process each feature column
@@ -337,29 +337,45 @@ class FilteringHandler:
             if profile['type'] == 'numeric':
                 # For numeric features: vectorized z-score calculation
                 if 'std' in profile and 'mean' in profile and profile['std'] > 0:
-                    # Calculate z-scores for entire column at once
-                    z_scores = np.abs((df[col].values - profile['mean']) / profile['std'])
-                    # Convert z-scores to similarities (closer to reference = higher score)
+                    col_values = df[col].values
+                    # OPTIMIZATION: Pre-compute constants outside the calculation
+                    mean_val = profile['mean']
+                    inv_std = 1.0 / profile['std']
+                    
+                    # Vectorized NumPy calculation
+                    z_scores = np.abs((col_values - mean_val) * inv_std)
                     similarities = np.maximum(0, 1 - np.minimum(z_scores / 3, 1))
-                    # Add to total scores, handling NaN values
                     mask = ~np.isnan(similarities)
                     scores[mask] += similarities[mask]
             else:
                 # For categorical features: use frequency of each value
                 if 'frequencies' in profile:
-                    # Map each value to its frequency
-                    value_freqs = df[col].map(profile['frequencies'])
+                    # OPTIMIZATION: Use categorical codes for faster lookup
+                    col_data = df[col]
                     
-                    # Check if value_freqs is a Categorical Series and convert to float if needed
-                    if pd.api.types.is_categorical_dtype(value_freqs):
-                        value_freqs = value_freqs.astype(float)
-                    
-                    # Replace NaN with small non-zero value
-                    value_freqs = value_freqs.fillna(0.1)
-                    scores += value_freqs.values
+                    if pd.api.types.is_categorical_dtype(col_data):
+                        # Fast path: use categorical codes instead of string values
+                        # Create lookup array indexed by category codes
+                        categories = col_data.cat.categories
+                        freq_lookup = np.full(len(categories), 0.1, dtype=np.float32)  # Default value
+                        for i, cat in enumerate(categories):
+                            freq_lookup[i] = profile['frequencies'].get(cat, 0.1)
+                        # Direct array indexing is much faster than .map()
+                        value_freqs = freq_lookup[col_data.cat.codes]
+                        scores += value_freqs
+                    else:
+                        # Fallback for non-categorical columns (slower)
+                        value_freqs = col_data.map(profile['frequencies'])
+                        if pd.api.types.is_categorical_dtype(value_freqs):
+                            value_freqs = value_freqs.astype(float)
+                        value_freqs = value_freqs.fillna(0.1)
+                        scores += value_freqs.values
         
         # Normalize scores by number of features
-        return scores / feature_count if feature_count > 0 else np.zeros(len(df))
+        if feature_count > 0:
+            return scores / feature_count
+        else:
+            return scores
 
     @staticmethod
     def _build_feature_profiles(non_dup_df, record_id_column):

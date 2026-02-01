@@ -630,17 +630,17 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
                 filtering_configs = [(0, None)]
             else:
                 filtering_configs = [ 
-                    (0, None),       # Keep only unique records
+                    # (0, None),       # Keep only unique records
                     
-                    (1, 'random'),   # Keep 1 random duplicate
-                    (2, 'random'),   # Keep 2 random duplicate
-                    (3, 'random'),   # Keep 3 random duplicates
-                    (5, 'random'),   # Keep 5 random duplicates
+                    # (1, 'random'),   # Keep 1 random duplicate
+                    # (2, 'random'),   # Keep 2 random duplicate
+                    # (3, 'random'),   # Keep 3 random duplicates
+                    # (5, 'random'),   # Keep 5 random duplicates
                     
-                    (1, 'imputation'),  # Keep 1 duplicate by imputation
+                    # (1, 'imputation'),  # Keep 1 duplicate by imputation
                     (2, 'imputation'),  # Keep 2 duplicate by imputation
-                    (3, 'imputation'),  # Keep 3 duplicates by imputation
-                    (5, 'imputation'),  # Keep 5 duplicates by imputation
+                    # (3, 'imputation'),  # Keep 3 duplicates by imputation
+                    # (5, 'imputation'),  # Keep 5 duplicates by imputation
                     
                     # knn performed slightly worse than imputation with longer runtimes in multiple tests
                     # (1, 'knn'),      # Keep 1 duplicate using KNN similarity

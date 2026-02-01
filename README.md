@@ -14,7 +14,7 @@ This repository contains the codebase for the paper: **[tbd.]()**
 ```
 ### Abstract
 
-> User-driven privacy allows individuals to control whether and at what granularity their data is shared, leading to datasets that mix original, generalized, and missing values within the same records and attributes. While such representations are intuitive for privacy, they pose challenges for machine learning, which typically treats non-original values as new categories or as missing, thereby discarding generalization semantics. For learning from such tabular data, we propose novel data transformation strategies that account for heterogeneous anonymizations and evaluate them alongside standard imputation and LLM-based approaches. We employ multiple datasets, privacy configurations, and deployment scenarios, demonstrating that our method reliably regains utility. Our results show that generalized values are preferable to pure suppression, that the best data preparation strategy depends on the scenario, and that consistent data representations are crucial for maintaining downstream utility. Overall, our findings highlight that effective learning is tied to the appropriate handling of anonymized values.
+> User-driven privacy allows individuals to control whether and at what granularity their data is shared, leading to datasets that mix original, generalized, and missing values within the same records and attributes. While such representations are intuitive for privacy, they pose challenges for machine learning, which typically treats non-original values as new categories or as missing, thereby discarding generalization semantics. For learning from such tabular data, we propose novel data transformation strategies that account for heterogeneous anonymization and evaluate them alongside standard imputation and LLM-based approaches. We employ multiple datasets, privacy configurations, and deployment scenarios, demonstrating that our method reliably regains utility. Our results show that generalized values are preferable to pure suppression, that the best data preparation strategy depends on the scenario, and that consistent data representations are crucial for maintaining downstream utility. Overall, our findings highlight that effective learning is tied to the appropriate handling of anonymized values.
 
 ### Reference Data
 
@@ -120,7 +120,7 @@ The project includes LLM-based approaches for data imputation and prediction. Wh
 **What LLM evaluation does:**
 
 For each dataset's training and test sets:
-1. **Value Imputation**: Predicts missing/generalized values and creates imputed dataset versions (both parts saved as CSV)
+1. **Value Imputation**: Predicts missing/generalized values and creates imputed dataset versions (both parts saved as separate CSVs)
 2. **Label Prediction**: Directly predicts target labels from anonymized records (results saved as CSV)
 
 Results are saved in `llm_evaluation/{percentage}_results/` directories. When finished, rename to `llm_evaluation/{percentage}/` for use in model evaluation.
@@ -184,7 +184,7 @@ Run the complete evaluation pipeline to train and test models on prepared datase
 
 To run a comprehensive set of experiments, you can configure and use the `run_all.sh` script.
 
-1.  **Configure `run_all.sh`**: Open the `run_all.sh` script and modify the arrays (`datasets`, `percentages_list`, `train_methods`, `test_methods`, etc.) by commenting out unwanted runs to define the parameter space for your experiments. Also consider the variables `DATA_DIR` and `batch_size` (also `require_matching_methods` if needed). Cluster-related settings for the DaskSlurmCluster constructor need to be changed in the `Main.py`.
+1.  **Configure `run_all.sh`**: Open the `run_all.sh` script and modify the arrays (`datasets`, `percentages_list`, `train_methods`, `test_methods`, etc.) by commenting out unwanted runs to define the parameter space for your experiments. Also consider the variables `DATA_DIR` and `batch_size` (also `require_matching_methods` if needed). Cluster-related settings for the DaskSlurmCluster constructor need to be changed in the `Main.py`. For runs using weighted_specialization you may also want restrict the number of methods tested per run through the `filtering_configs` array `Main.py`, as a broad selection can lead to high memory and computing loads.
 
 2.  **Execute the script**:
     ```bash
