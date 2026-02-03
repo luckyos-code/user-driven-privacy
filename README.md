@@ -2,16 +2,18 @@
 
 ### Paper
 
-This repository contains the codebase for the paper: **[tbd.]()**
+This repository contains the codebase for the paper: **[Learning from Anonymized and Incomplete Tabular Data](https://doi.org/10.48550/arXiv.2602.01217)**
 
 ```bibtex
-@article{tbd.,
-  title={...},
-  author={...},
-  journal={...},
-  year={...}
+@article{lange2026learning,
+  title = {Learning from {{Anonymized}} and {{Incomplete Tabular Data}}},
+  author = {Lange, Lucas and B{\"o}ttinger, Adrian and Christen, Victor and Vidanage, Anushka and Christen, Peter and Rahm, Erhard},
+  journal = {arXiv preprint arXiv:2602.01217}
+  year = {2026},
+  doi = {10.48550/arXiv.2602.01217},
 }
 ```
+
 ### Abstract
 
 > User-driven privacy allows individuals to control whether and at what granularity their data is shared, leading to datasets that mix original, generalized, and missing values within the same records and attributes. While such representations are intuitive for privacy, they pose challenges for machine learning, which typically treats non-original values as new categories or as missing, thereby discarding generalization semantics. For learning from such tabular data, we propose novel data transformation strategies that account for heterogeneous anonymization and evaluate them alongside standard imputation and LLM-based approaches. We employ multiple datasets, privacy configurations, and deployment scenarios, demonstrating that our method reliably regains utility. Our results show that generalized values are preferable to pure suppression, that the best data preparation strategy depends on the scenario, and that consistent data representations are crucial for maintaining downstream utility. Overall, our findings highlight that effective learning is tied to the appropriate handling of anonymized values.
