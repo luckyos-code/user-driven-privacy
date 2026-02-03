@@ -137,7 +137,7 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
         def _patched_gethostname():
             try:
                 return _original_gethostname()
-            except:
+            except OSError:
                 return 'localhost'
         
         def _patched_getfqdn(name=''):
