@@ -91,7 +91,10 @@ class RecordBasedSpecialization:
         
         # Convert to Dask DataFrame if not already
         if not isinstance(df, dd.DataFrame):
-            ddf = dd.from_pandas(df, npartitions=max(1, len(df) // 1000))
+            #TODO
+            # this can be changed depending on cluster, partitions every 10k rows is good
+            # but if possible just 1 partition performs better of course
+            ddf = dd.from_pandas(df, npartitions=max(1, len(df) // 10000))
         else:
             ddf = df
         
