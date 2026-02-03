@@ -361,7 +361,11 @@ class FilteringHandler:
                         for i, cat in enumerate(categories):
                             freq_lookup[i] = profile['frequencies'].get(cat, 0.1)
                         # Direct array indexing is much faster than .map()
-                        value_freqs = freq_lookup[col_data.cat.codes]
+                        codes = col_data.cat.codes.to_numpy()
+                        valid_mask = codes != -1  # -1 indicates missing values in pandas categoricals
+                        # Initialize with default frequency for all, then overwrite valid positions
+                        value_freqs = np.full(len(col_data), 0.1, dtype=np.float32)
+                        value_freqs[valid_mask] = freq_lookup[codes[valid_mask]]
                         scores += value_freqs
                     else:
                         # Fallback for non-categorical columns (slower)

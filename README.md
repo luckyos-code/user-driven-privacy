@@ -8,7 +8,7 @@ This repository contains the codebase for the paper: **[Learning from Anonymized
 @article{lange2026learning,
   title = {Learning from {{Anonymized}} and {{Incomplete Tabular Data}}},
   author = {Lange, Lucas and B{\"o}ttinger, Adrian and Christen, Victor and Vidanage, Anushka and Christen, Peter and Rahm, Erhard},
-  journal = {arXiv preprint arXiv:2602.01217}
+  journal = {arXiv preprint arXiv:2602.01217},
   year = {2026},
   doi = {10.48550/arXiv.2602.01217},
 }

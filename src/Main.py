@@ -131,7 +131,7 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
         # XGBoost's tracker tries to resolve hostname which often fails on macOS
         import socket
         _original_gethostname = socket.gethostname
-        _original_getfqdn = socket.getfqdn
+
         _original_gethostbyname = socket.gethostbyname
         
         def _patched_gethostname():
@@ -144,7 +144,11 @@ def run_evaluation(n_workers: int = 1, use_gpu: bool = False, save_dir: str = No
             return 'localhost'
         
         def _patched_gethostbyname(hostname):
-            if hostname in ('localhost', socket.gethostname()):
+            try:
+                local_hostname = _original_gethostname()
+            except Exception:
+                local_hostname = 'localhost'
+            if hostname in ('localhost', local_hostname):
                 return '127.0.0.1'
             return _original_gethostbyname(hostname)
         
